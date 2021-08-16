@@ -1,0 +1,167 @@
+---
+title: R语言处理PCR数据，一步画柱状图、添加显著性标志并实现截断
+author: Song Ou-Yang
+date: '2021-07-16'
+slug: r-pcr
+categories:
+  - 教程
+  - R
+tags:
+  - R
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2021-08-16T19:34:14+08:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+---
+
+
+
+<p>比如有如下的一个表格</p>
+<pre class="r"><code>library(DT)
+pcr&lt;-read.csv(&#39;~/Desktop/pcr.csv&#39;)
+knitr::kable(pcr)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">group</th>
+<th align="right">GAPDH</th>
+<th align="right">ST3GAL5</th>
+<th align="right">X_Ct</th>
+<th align="left">cycle</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">NC</td>
+<td align="right">12.17</td>
+<td align="right">23.76</td>
+<td align="right">11.59</td>
+<td align="left">first</td>
+</tr>
+<tr class="even">
+<td align="left">NC</td>
+<td align="right">11.88</td>
+<td align="right">23.79</td>
+<td align="right">11.91</td>
+<td align="left">first</td>
+</tr>
+<tr class="odd">
+<td align="left">NC</td>
+<td align="right">11.92</td>
+<td align="right">23.57</td>
+<td align="right">11.65</td>
+<td align="left">first</td>
+</tr>
+<tr class="even">
+<td align="left">OE</td>
+<td align="right">11.81</td>
+<td align="right">19.06</td>
+<td align="right">7.25</td>
+<td align="left">first</td>
+</tr>
+<tr class="odd">
+<td align="left">OE</td>
+<td align="right">11.66</td>
+<td align="right">19.14</td>
+<td align="right">7.48</td>
+<td align="left">first</td>
+</tr>
+<tr class="even">
+<td align="left">OE</td>
+<td align="right">11.59</td>
+<td align="right">18.81</td>
+<td align="right">7.22</td>
+<td align="left">first</td>
+</tr>
+<tr class="odd">
+<td align="left">NC</td>
+<td align="right">11.66</td>
+<td align="right">24.06</td>
+<td align="right">12.40</td>
+<td align="left">secend</td>
+</tr>
+<tr class="even">
+<td align="left">NC</td>
+<td align="right">11.60</td>
+<td align="right">24.00</td>
+<td align="right">12.40</td>
+<td align="left">secend</td>
+</tr>
+<tr class="odd">
+<td align="left">NC</td>
+<td align="right">11.52</td>
+<td align="right">24.16</td>
+<td align="right">12.64</td>
+<td align="left">secend</td>
+</tr>
+<tr class="even">
+<td align="left">OE</td>
+<td align="right">11.97</td>
+<td align="right">18.77</td>
+<td align="right">6.80</td>
+<td align="left">secend</td>
+</tr>
+<tr class="odd">
+<td align="left">OE</td>
+<td align="right">11.85</td>
+<td align="right">18.89</td>
+<td align="right">7.04</td>
+<td align="left">secend</td>
+</tr>
+<tr class="even">
+<td align="left">OE</td>
+<td align="right">11.91</td>
+<td align="right">18.84</td>
+<td align="right">6.93</td>
+<td align="left">secend</td>
+</tr>
+<tr class="odd">
+<td align="left">NC</td>
+<td align="right">12.01</td>
+<td align="right">23.98</td>
+<td align="right">11.97</td>
+<td align="left">third</td>
+</tr>
+<tr class="even">
+<td align="left">NC</td>
+<td align="right">12.01</td>
+<td align="right">23.99</td>
+<td align="right">11.98</td>
+<td align="left">third</td>
+</tr>
+<tr class="odd">
+<td align="left">NC</td>
+<td align="right">11.95</td>
+<td align="right">23.80</td>
+<td align="right">11.85</td>
+<td align="left">third</td>
+</tr>
+<tr class="even">
+<td align="left">OE</td>
+<td align="right">11.78</td>
+<td align="right">19.89</td>
+<td align="right">8.11</td>
+<td align="left">third</td>
+</tr>
+<tr class="odd">
+<td align="left">OE</td>
+<td align="right">11.85</td>
+<td align="right">19.75</td>
+<td align="right">7.90</td>
+<td align="left">third</td>
+</tr>
+<tr class="even">
+<td align="left">OE</td>
+<td align="right">11.81</td>
+<td align="right">19.47</td>
+<td align="right">7.66</td>
+<td align="left">third</td>
+</tr>
+</tbody>
+</table>

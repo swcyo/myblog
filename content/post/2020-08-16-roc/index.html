@@ -1,0 +1,137 @@
+---
+title: "两独立样本进行统计,作箱式图和ROC曲线"
+author: "Song Ou-Yang"
+date: '2020-08-16'
+output: pdf_document
+categories:
+- 教程
+- R
+- phD
+tags: phD
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2021-08-16T15:45:14+08:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+slug: roc
+---
+
+
+
+<ul>
+<li>比较肿瘤与正常组织的差异,需要进行两独立样本的T检验,可以用boxplot展示,还可以用RCO曲线评估预测性能,那么可以用ggplot2和pROC进行图片构建.</li>
+<li>首先导入数据,需要类型和数值两列,如下所示:</li>
+</ul>
+<pre class="r"><code> library(readr)
+ data&lt;- read.csv(&quot;content/post/2020-08-16-roc/data.csv&quot;)
+ knitr::kable(data)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Type</th>
+<th>value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Cancer</td>
+<td>10.005625</td>
+</tr>
+<tr class="even">
+<td>Cancer</td>
+<td>7.851749</td>
+</tr>
+<tr class="odd">
+<td>Cancer</td>
+<td>10.030667</td>
+</tr>
+<tr class="even">
+<td>Cancer</td>
+<td>10.79604</td>
+</tr>
+<tr class="odd">
+<td>Cancer</td>
+<td>9.805744</td>
+</tr>
+<tr class="even">
+<td>Normal</td>
+<td>10.210671</td>
+</tr>
+<tr class="odd">
+<td>Normal</td>
+<td>9.319673</td>
+</tr>
+<tr class="even">
+<td>Normal</td>
+<td>8.9128895</td>
+</tr>
+<tr class="odd">
+<td>Normal</td>
+<td>9.3442955</td>
+</tr>
+<tr class="even">
+<td>Normal</td>
+<td>11.58684</td>
+</tr>
+<tr class="odd">
+<td>Normal</td>
+<td>8.672425</td>
+</tr>
+<tr class="even">
+<td>Normal</td>
+<td>10.518653</td>
+</tr>
+<tr class="odd">
+<td>Normal</td>
+<td>9.902375</td>
+</tr>
+</tbody>
+</table>
+<p>首先是boxplot,可以用<code>ggplot2</code>作图,<code>ggsignif</code>进行统计,然后<code>ggsci</code>配色,由于默认的X轴排序是按英文来的,如果想固定一个顺序排序,可以把X轴的变量设置为因子,然后定义先后顺序</p>
+<pre class="r"><code> data&lt;- within(data, Type &lt;- factor(Type, levels = c(&quot;Normal&quot;, &quot;Cancer&quot;))) 
+ shapiro.test(data$value)  # 首先进行正态检验
+#   Shapiro-Wilk normality test
+#
+#data:  data$value
+#W = 0.98318, p-value = 0.005502</code></pre>
+<ul>
+<li>可知p&lt;0.05,不符合正态分布,选择非参数检验,默认的就是<code>非参数检验</code>,如果大于0.5就改用<code>t.test</code></li>
+</ul>
+<pre class="r"><code> library(ggplot2)
+ library(ggsignif)
+ library(ggsci)
+ p1&lt;-ggplot(data,aes(x=Type,y=value,color=Type,shape=Type))+ #X轴为类型,Y轴为数值,按类型填色,按类型分形状
+   geom_boxplot()+geom_jitter()+#加柱状图,加点
+   theme_bw(base_size = 12)+#背景和字体大学
+   theme(legend.position = &#39;none&#39;)+#去掉标签
+   ggtitle(&quot;Dataset&quot;)+xlab(NULL)+#添加标题,去掉X轴
+   ylab(&quot;Expression value\nelog2(TPM+1)&quot;)+ #\n表示下一行
+   scale_color_lancet()+#lancet配色
+   geom_signif(comparisons = list(c(&quot;Normal&quot;,&quot;Cancer&quot;)),map_signif_level = T,textsize = 4)#显著标识
+ p1</code></pre>
+<p><img src="images/000003.png" />
+接下来是ROC曲线的构建,需要用到<code>pROC</code></p>
+<pre class="r"><code># library(pROC)
+ roc&lt;-roc(data$Type,data$value,ci=TRUE,  smooth = TRUE) #进行roc计算,然后做曲线处理
+ roc$ci # 只有2.5,50和97.5%的置信区间,不是95%
+# 95% CI: 0.506-0.672 (2000 stratified bootstrap replicates)
+ roc$auc #曲线下面积,一般大于0.5最好
+# Area under the curve: 0.5878</code></pre>
+<div id="画图" class="section level1">
+<h1>画图</h1>
+<pre class="r"><code> p2&lt;-ggroc(roc,color=&quot;#00468B&quot;)+ggtitle(&quot;ROC curver&quot;)+
+   theme_bw(base_size = 12)+     
+   geom_segment(aes(x = 1, xend = 0, y = 0, yend = 1), color=&quot;grey&quot;,linetype=&quot;dashed&quot;)+
+   ggplot2::annotate(&#39;text&#39;,x=0.12,y=0.25,label=paste(&quot;AUC:&quot;,round(roc$auc,4)))+ # 提取ACU结果,四位小数点
+  ggplot2::annotate(&#39;text&#39;,x=0.18,y=0.15,label=paste(&quot;97.5%CI:&quot;,round(roc$ci[1],4),&quot;-&quot;,round(roc$ci[3],4)))# 提取97.5%结果,四位小数点
+ p2</code></pre>
+<p><img src="images/000004.png" />
+<h1>最后,将两张图拼起来</h1>
+<pre class="r"><code> cowplot::plot_grid(p1,p2,labels = &quot;AUTO&quot;)</code></pre>
+<p><img src="images/000005.png" /></p>
+</div>
