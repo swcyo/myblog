@@ -1,5 +1,6 @@
 ---
 title: RStudio1.4发布，新增markdown可视化太强大了
+link-citations: true
 author: 欧阳松
 date: '2021-08-17'
 slug: RStuido
@@ -18,6 +19,7 @@ image:
   focal_point: ''
   preview_only: no
 projects: []
+bibliography: references.bib
 ---
 
 <script src="{{< blogdown/postref >}}index_files/header-attrs/header-attrs.js"></script>
@@ -45,12 +47,36 @@ Rmarkdown编辑可视化<a href="https://rstudio.github.io/visual-markdown-editi
 <p>而且插入图片可以直接点击上面的那个图片的符号，选好图片就出现效果了，可以自动添加标题和链接</p>
 <p><img src="2.1.jpeg" /></p>
 <p>而且点一下图片，还可以直接编辑图片大小，真好 <img src="1.1.jpeg" /></p>
-<p>在Insert那里还有很多效果，最喜欢的是@Citation，这简直是写期刊和论文的利器</p>
+<p>在Insert那里还有很多效果，最喜欢的是@Citation，这简直是写期刊和论文的利器，教程可以看这个</p>
+<p><a href="https://rstudio.github.io/visual-markdown-editing/citations.html" class="uri">https://rstudio.github.io/visual-markdown-editing/citations.html</a></p>
 <p><img src="2.jpeg" /></p>
-<p>参考文献支持Pubmed搜索关键词，连打开网站都省了，速度还挺快，比Endnote好</p>
+<p>当然如果要支持显示参考文献的话，在新增的Rmd文件里需要在最前面的yml上添上这几句话（md是别的代码）</p>
+<pre><code>---
+title: &quot;My Document&quot;
+bibliography: references.bib
+link-citations: true
+---</code></pre>
+<p>参考文献支持Pubmed搜索关键词，连打开网站都省了，速度还挺快，比Endnote好，比如：</p>
+<p>我的一篇文章<span class="citation">(<a href="#ref-ou-yang2020" role="doc-biblioref">Ou-Yang, Liu, and Wang 2020</a>)</span>，</p>
 <p><img src="6.jpeg" /></p>
-<p>还支持输入DOI直接搜索期刊，自动生成参考文献。</p>
+<p>还支持输入DOI直接搜索期刊，自动生成参考文献，比如</p>
+<p>我的另一篇文章<span class="citation">(<a href="#ref-Ouyang2020" role="doc-biblioref">Ouyang et al. 2020</a>)</span>：</p>
 <p><img src="4.jpeg" /></p>
-<p>当然还支持开源的<strong>Zotero</strong>，可以直接加载本地的库插入参考文献，当然在线的也可以</p>
-<p>Zotero也是开源的软件，和R一样都是免费的东西，不用盗版，也不用破解。。。</p>
+<p>当然还支持开源的<strong>Zotero</strong>，可以直接加载本地的库插入参考文献，当然要安装Zotero，而且在百度学术上下载的文献格式还可以直接导入Zotero，期刊格式也是在线搜索</p>
+<p>不过目前对中文的支持好像还不行，可能需要别的办法</p>
+<p>当然在线的也可以，而且浏览器还有插件，可以自动爬取网页生成参考文献。</p>
+<blockquote>
+<p>注：Zotero也是开源的软件，和R一样都是免费的东西，不用盗版，也不用破解，是所有文献管理软件的王者</p>
+</blockquote>
 <p>可视化还是不错的，不然用了R，干嘛还要开发RStudio这款IDE呢。。。</p>
+<div id="参考文献" class="section level3 unnumbered">
+<h3>参考文献：</h3>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-Ouyang2020" class="csl-entry">
+Ouyang, Song, Ji?Hong Liu, Zhao Ni, Guo?Fu Ding, and Qin?Zhang Wang. 2020. <span>“Downregulation of St3gal5 Is Associated with Muscle Invasion, High Grade and a Poor Prognosis in Patients with Bladder Cancer.”</span> <em>Oncology Letters</em> 20 (1): 828–40. <a href="https://doi.org/10.3892/ol.2020.11597">https://doi.org/10.3892/ol.2020.11597</a>.
+</div>
+<div id="ref-ou-yang2020" class="csl-entry">
+Ou-Yang, Song, Ji-Hong Liu, and Qin-Zhang Wang. 2020. <span>“Expression Patterns and a Prognostic Model of m6A-Associated Regulators in Prostate Adenocarcinoma.”</span> <em>Biomarkers in Medicine</em> 14 (18): 1717–31. <a href="https://doi.org/10.2217/bmm-2020-0095">https://doi.org/10.2217/bmm-2020-0095</a>.
+</div>
+</div>
+</div>

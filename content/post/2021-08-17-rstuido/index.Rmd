@@ -1,5 +1,6 @@
 ---
 title: RStudio1.4发布，新增markdown可视化太强大了
+link-citations: true
 author: 欧阳松
 date: '2021-08-17'
 slug: RStuido
@@ -18,6 +19,7 @@ image:
   focal_point: ''
   preview_only: no
 projects: []
+bibliography: references.bib
 ---
 
 最近一直在学习用**RStudio**建博客和写文章或书什么的，有了`Rmarkdown`的支持，可以渲染很有有用的可视化效果，但是很多语句都是基于`markdown`语言来写的，虽然markdown作为一款轻量级的语言，很适合用来写东西，而不是来排版，但是一直用代码，也是很烦人的，尤其我又是一个懒人，我要的是效果，而不是代码。
@@ -52,20 +54,40 @@ projects: []
 
 而且点一下图片，还可以直接编辑图片大小，真好 ![](1.1.jpeg)
 
-在Insert那里还有很多效果，最喜欢的是\@Citation，这简直是写期刊和论文的利器
+在Insert那里还有很多效果，最喜欢的是\@Citation，这简直是写期刊和论文的利器，教程可以看这个
+
+<https://rstudio.github.io/visual-markdown-editing/citations.html>
 
 ![](2.jpeg)
 
-参考文献支持Pubmed搜索关键词，连打开网站都省了，速度还挺快，比Endnote好
+当然如果要支持显示参考文献的话，在新增的Rmd文件里需要在最前面的yml上添上这几句话（md是别的代码）
+
+    ---
+    title: "My Document"
+    bibliography: references.bib
+    link-citations: true
+    ---
+
+参考文献支持Pubmed搜索关键词，连打开网站都省了，速度还挺快，比Endnote好，比如：
+
+我的一篇文章[@ou-yang2020]，
 
 ![](6.jpeg)
 
-还支持输入DOI直接搜索期刊，自动生成参考文献。
+还支持输入DOI直接搜索期刊，自动生成参考文献，比如
+
+我的另一篇文章[@Ouyang2020]：
 
 ![](4.jpeg)
 
-当然还支持开源的**Zotero**，可以直接加载本地的库插入参考文献，当然在线的也可以
+当然还支持开源的**Zotero**，可以直接加载本地的库插入参考文献，当然要安装Zotero，而且在百度学术上下载的文献格式还可以直接导入Zotero，期刊格式也是在线搜索
 
-Zotero也是开源的软件，和R一样都是免费的东西，不用盗版，也不用破解。。。
+不过目前对中文的支持好像还不行，可能需要别的办法
+
+当然在线的也可以，而且浏览器还有插件，可以自动爬取网页生成参考文献。
+
+> 注：Zotero也是开源的软件，和R一样都是免费的东西，不用盗版，也不用破解，是所有文献管理软件的王者
 
 可视化还是不错的，不然用了R，干嘛还要开发RStudio这款IDE呢。。。
+
+### 参考文献：
