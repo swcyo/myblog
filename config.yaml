@@ -5,7 +5,7 @@ theme: "uroblog"
 # This file is formatted using YAML syntax - learn more at https://learnxinyminutes.com/docs/yaml/
 
 title: Swcyo # Website name
-baseurl: 'https://swcyo.netlify.app/' # Website URL
+baseurl: '' # Website URL
 copyright: '© {2021} Song Ou-Yang' # Footer text, e.g. '© {year} Me'
 
 ############################
