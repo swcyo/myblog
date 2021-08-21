@@ -37,6 +37,5 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
-public
 static/figures
 /blogdown

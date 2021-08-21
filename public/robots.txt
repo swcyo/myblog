@@ -1,0 +1,3 @@
+User-agent: *
+
+Sitemap: https://swcyo.netlify.app/sitemap.xml

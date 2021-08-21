@@ -1,0 +1,2273 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>R Markdown | Swcyo</title>
+    <link>https://swcyo.netlify.app/tag/r-markdown/</link>
+      <atom:link href="https://swcyo.netlify.app/tag/r-markdown/index.xml" rel="self" type="application/rss+xml" />
+    <description>R Markdown</description>
+    <generator>Wowchemy (https://wowchemy.com)</generator><language>en-us</language><copyright>© {2021} Song Ou-Yang</copyright><lastBuildDate>Thu, 19 Aug 2021 00:00:00 +0000</lastBuildDate>
+    <image>
+      <url>https://swcyo.netlify.app/media/icon_hua2ec155b4296a9c9791d015323e16eb5_11927_512x512_fill_lanczos_center_3.png</url>
+      <title>R Markdown</title>
+      <link>https://swcyo.netlify.app/tag/r-markdown/</link>
+    </image>
+    
+    <item>
+      <title>ROnmine处理oncomine数据</title>
+      <link>https://swcyo.netlify.app/post/oncomine/</link>
+      <pubDate>Thu, 19 Aug 2021 00:00:00 +0000</pubDate>
+      <guid>https://swcyo.netlify.app/post/oncomine/</guid>
+      <description>
+&lt;script src=&#34;https://swcyo.netlify.app/post/oncomine/index_files/header-attrs/header-attrs.js&#34;&gt;&lt;/script&gt;
+&lt;script src=&#34;https://swcyo.netlify.app/post/oncomine/index_files/htmlwidgets/htmlwidgets.js&#34;&gt;&lt;/script&gt;
+&lt;script src=&#34;https://swcyo.netlify.app/post/oncomine/index_files/plotly-binding/plotly.js&#34;&gt;&lt;/script&gt;
+&lt;script src=&#34;https://swcyo.netlify.app/post/oncomine/index_files/typedarray/typedarray.min.js&#34;&gt;&lt;/script&gt;
+&lt;script src=&#34;https://swcyo.netlify.app/post/oncomine/index_files/jquery/jquery.min.js&#34;&gt;&lt;/script&gt;
+&lt;link href=&#34;https://swcyo.netlify.app/post/oncomine/index_files/crosstalk/css/crosstalk.css&#34; rel=&#34;stylesheet&#34; /&gt;
+&lt;script src=&#34;https://swcyo.netlify.app/post/oncomine/index_files/crosstalk/js/crosstalk.min.js&#34;&gt;&lt;/script&gt;
+&lt;link href=&#34;https://swcyo.netlify.app/post/oncomine/index_files/plotly-htmlwidgets-css/plotly-htmlwidgets.css&#34; rel=&#34;stylesheet&#34; /&gt;
+&lt;script src=&#34;https://swcyo.netlify.app/post/oncomine/index_files/plotly-main/plotly-latest.min.js&#34;&gt;&lt;/script&gt;
+
+
+&lt;ol style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;基本介绍&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;strong&gt;oncomine&lt;/strong&gt;是一个很好的肿瘤数据库，功能很强大，也有可视化的操作，但是最大的问题是数据不能很好的获得，，而且自带的图很丑（而且只是png），关于oncomine的教程有很多，比较经典有解螺旋的教程，比如下面这个，基本涵盖了常用的功能：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://mp.weixin.qq.com/s/nwOBMA8BMVfmOHL1CM30OQ&#34;&gt;麦子陪你做作业（三）：肿瘤经典数据库Oncomine实训操作&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;然而，大神&lt;a href=&#34;https://github.com/yikeshu0611&#34;&gt;yikeshu0611&lt;/a&gt;默默的为我们付出，之前开发了一个R包叫&lt;code&gt;ROncomine&lt;/code&gt;可以很方便的获得数据，并且再次出图，不过最近又更新为&lt;a href=&#34;https://github.com/yikeshu0611/oncomineR&#34;&gt;&lt;code&gt;oncomineR&lt;/code&gt;&lt;/a&gt;了，新版的我还没研究，这里我们还是先说老版的&lt;code&gt;ROncomine&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;这个包以前托管在Github上（由于众所皆知的原因，国内访问Github很困难），但是目前已经删除了，好在我之前已经导入到了我的码云上了，所以也可以很快的安装。&lt;/p&gt;
+&lt;p&gt;以前其实还有一个教程&lt;a href=&#34;https://cloud.tencent.com/developer/news/285412&#34;&gt;破解&lt;strong&gt;oncomine&lt;/strong&gt;无法免费下载数据，学员&lt;strong&gt;开发了&lt;/strong&gt;一款R语言包&lt;/a&gt;，但是目前也被删除了，估计这个还是有版权的，所以我还是悄悄的写个自己看的教程&lt;/p&gt;
+&lt;p&gt;首先需要安装devtools，然后调用install_git函数就可以直接安装,之后就方便了&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;install.packages(‘devtools’)&lt;/p&gt;
+&lt;p&gt;devtools::install_git(’&lt;a href=&#34;https://gitee.com/swcyo/oncomineR&amp;#39;&#34;&gt;https://gitee.com/swcyo/oncomineR’)&lt;/a&gt;)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;其实每一个oncomine的数据都可以使用浏览器获得，用chrome浏览器登录，随便一个地方鼠标右击找到检查元素，就可以看到代码区，使用Crtl+F查找&amp;lt;map，我们需要的代码全都在&amp;lt;map那一片，右击复制然后新建一个文本文档保存起来&lt;/p&gt;
+&lt;p&gt;oncomineR的原理只是是把检查元素里&amp;lt;map那串代码二次处理，从而简化工作，然后调用ploty作图，当然你也可以用ggplot2再次画图&lt;/p&gt;
+&lt;ol start=&#34;2&#34; style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;单基因在基本中的总结（&lt;strong&gt;Gene Summary&lt;/strong&gt;）&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;按照解螺旋的教程，比如搜索&lt;strong&gt;CXCL8&lt;/strong&gt;基因，实际上基因名为&lt;code&gt;IL8&lt;/code&gt;，然后我们可以在右边看到这样的一个热图：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;geneSummary.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;我们复制&lt;code&gt;&amp;lt;map&lt;/code&gt;那一串代码，保存为&lt;code&gt;heatmap.txt&lt;/code&gt;文件，我们可以用&lt;code&gt;Oncomine_heatmap_DiseaseSummaryfor_SomeGene&lt;/code&gt;处理&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt; library(ROncomine)
+heat&amp;lt;-Oncomine_heatmap_DiseaseSummaryfor_SomeGene(&amp;#39;/Users/mac/Documents/GitHub/myblog/content/post/2021-08-19-oncomine/heatmap.txt&amp;#39;) # 命名为heat
+knitr::kable(heat) ## 这步是我的教程示例代码，不需要执行&lt;/code&gt;&lt;/pre&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr class=&#34;header&#34;&gt;
+&lt;th align=&#34;left&#34;&gt;&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Cancer Type&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Analysis Type&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;meat threshold&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;meat intotal&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;expression&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Bladder Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer Histology&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;3&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;18&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X2&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Bladder Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer Histology&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;3&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;18&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;under&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X3&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Bladder Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Multi-cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;9&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X4&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Bladder Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Outlier&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;12&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X5&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Bladder Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Outlier&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;2&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;12&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;under&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X6&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Brain and CNS Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer vs. Normal&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;36&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X7&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Brain and CNS Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer Histology&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;3&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;66&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X8&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Brain and CNS Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer Histology&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;2&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;66&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;under&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X9&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Brain and CNS Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Outlier&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;16&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;37&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X10&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Brain and CNS Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Outlier&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;7&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;37&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;under&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X11&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Breast Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Multi-cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;2&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;23&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;under&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X12&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Breast Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Outlier&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;29&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;68&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X13&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Breast Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Outlier&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;5&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;68&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;under&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X14&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cervical Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer vs. Normal&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;10&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X15&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cervical Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Outlier&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;2&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;8&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X16&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colorectal Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer vs. Normal&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;18&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;35&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X17&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colorectal Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer Histology&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;32&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X18&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colorectal Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer Histology&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;32&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;under&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X19&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colorectal Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Multi-cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;24&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X20&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colorectal Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Outlier&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;3&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;35&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X21&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colorectal Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Outlier&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;35&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;under&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X22&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Esophageal Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer vs. Normal&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;3&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;11&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X23&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Esophageal Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer Histology&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;8&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X24&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Esophageal Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer Histology&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;8&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;under&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X25&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Esophageal Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Multi-cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;8&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X26&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Esophageal Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Outlier&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;3&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;12&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X27&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Esophageal Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Outlier&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;12&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;under&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X28&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Gastric Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer vs. Normal&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;2&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;23&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X29&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Gastric Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer Histology&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;29&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X30&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Gastric Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer Histology&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;29&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;under&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X31&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Gastric Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Outlier&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;15&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X32&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Gastric Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Outlier&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;3&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;15&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;under&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X33&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Head and Neck Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer vs. Normal&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;32&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X34&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Head and Neck Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer Histology&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;14&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X35&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Head and Neck Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Multi-cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;2&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;10&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X36&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Head and Neck Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Multi-cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;10&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;under&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X37&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Head and Neck Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Outlier&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;22&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X38&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Head and Neck Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Outlier&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;6&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;22&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;under&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X39&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Kidney Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer Histology&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;44&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X40&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Kidney Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer Histology&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;44&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;under&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X41&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Kidney Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Multi-cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;18&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X42&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Kidney Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Multi-cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;18&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;under&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X43&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Kidney Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Outlier&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;10&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;18&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X44&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Kidney Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Outlier&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;2&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;18&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;under&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X45&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Leukemia&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer vs. Normal&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;39&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X46&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Leukemia&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer vs. Normal&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;3&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;39&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;under&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X47&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Leukemia&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer Histology&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;6&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;117&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X48&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Leukemia&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer Histology&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;117&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;under&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X49&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Leukemia&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Outlier&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;14&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;56&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X50&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Leukemia&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Outlier&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;12&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;56&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;under&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X51&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Liver Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer vs. Normal&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;2&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;13&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X52&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Liver Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Outlier&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;2&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;15&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X53&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Liver Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Outlier&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;7&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;15&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;under&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X54&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Lung Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Multi-cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;2&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;22&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X55&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Lung Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Outlier&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;10&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;36&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X56&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Lung Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Outlier&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;36&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;under&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X57&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Lymphoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer vs. Normal&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;2&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;36&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;under&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X58&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Lymphoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Multi-cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;5&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;17&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;under&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X59&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Lymphoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Outlier&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;18&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;34&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X60&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Lymphoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Outlier&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;2&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;34&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;under&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X61&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Melanoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer Histology&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X62&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Melanoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer Histology&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;under&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X63&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Melanoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Multi-cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;18&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X64&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Melanoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Outlier&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;7&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;22&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X65&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Melanoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Outlier&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;22&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;under&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X66&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Myeloma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer Histology&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;13&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X67&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Myeloma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer Histology&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;13&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;under&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X68&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Myeloma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Multi-cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;2&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;6&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;under&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X69&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Myeloma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Outlier&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;2&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;16&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X70&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Myeloma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Outlier&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;3&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;16&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;under&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X71&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Other Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer vs. Normal&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;3&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;32&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X72&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Other Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer Histology&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;32&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;under&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X73&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Other Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Outlier&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;12&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;36&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X74&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Other Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Outlier&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;2&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;36&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;under&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X75&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Ovarian Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Outlier&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;5&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;19&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X76&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Ovarian Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Outlier&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;2&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;19&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;under&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X77&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Pancreatic Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer vs. Normal&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;3&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;12&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X78&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Pancreatic Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Outlier&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;14&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X79&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Pancreatic Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Outlier&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;14&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;under&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X80&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Prostate Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Outlier&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;7&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;30&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X81&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Prostate Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Outlier&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;30&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;under&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X82&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Sarcoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer Histology&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;2&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;101&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X83&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Sarcoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer Histology&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;101&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;under&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X84&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Sarcoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Multi-cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;2&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;13&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;under&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X85&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Sarcoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Outlier&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;9&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;25&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X86&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Sarcoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Outlier&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;2&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;25&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;under&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;这样我们很快的就提取了所有需要的数据，比如我们只想提取&lt;code&gt;Cancer vs. Normal&lt;/code&gt;，那么可以用R语言处理，也可以用DataEditR交互式处理，或者导出来用excel处理&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# cn&amp;lt;-heat[heat$`Analysis Type` == &amp;#39;Cancer vs. Normal&amp;#39;,]
+# DataEditR::data_edit(heat) # 也可以用交互式编辑
+ cn&amp;lt;-read.csv(&amp;#39;/Users/mac/Documents/GitHub/myblog/content/post/2021-08-19-oncomine/cn.csv&amp;#39;)
+knitr::kable(cn)&lt;/code&gt;&lt;/pre&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr class=&#34;header&#34;&gt;
+&lt;th align=&#34;left&#34;&gt;X&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Cancer.Type&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Analysis.Type.&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;meat.threshold&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;meat.intotal&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;expression&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X6&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Brain and CNS Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer vs. Normal&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;36&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X14&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cervical Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer vs. Normal&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;10&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X16&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colorectal Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer vs. Normal&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;18&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;35&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X22&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Esophageal Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer vs. Normal&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;3&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;11&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X28&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Gastric Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer vs. Normal&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;2&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;23&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X33&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Head and Neck Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer vs. Normal&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;32&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X45&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Leukemia&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer vs. Normal&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;39&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X46&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Leukemia&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer vs. Normal&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;3&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;39&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;under&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X51&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Liver Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer vs. Normal&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;2&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;13&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X57&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Lymphoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer vs. Normal&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;2&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;36&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;under&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X71&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Other Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer vs. Normal&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;3&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;32&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;X77&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Pancreatic Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer vs. Normal&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;3&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;12&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;over&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;ol start=&#34;3&#34; style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;正常与癌症组织比较（&lt;strong&gt;Differential Analysis&lt;/strong&gt;）&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;继续使用解螺旋的示例，用Oncomine分别查询CXCL8在肠癌组织（与正常比）中高表达的数据集和低表达的数据集。筛选条件：P-value：1E-4；Fold Change：3；GENE Rank：Top10%。&lt;/p&gt;
+&lt;p&gt;这里要注意，默认选择的是子数据，比如Kalser Colon，光标是在Colon Mucinous Adenocarcinoma vs. Normal，这样只是比较肿瘤亚型与正常，这个时候在&lt;strong&gt;Differential Analysis&lt;/strong&gt;的GROUP BY是灰白的，如果我们要看所有，就要点击Kalser Colon，然后GROUP BY就可以选择下拉框了，我们选择Cancer and Normal Type，我们可以看到在GROUP里有很多很多的分组，其实就是很多很多的数据，我们想要的都可以提取了&lt;/p&gt;
+&lt;p&gt;默认的是一个barplot，出现的是直方图，鼠标在柱子上停留就可以看到value，也就是我们需要的&lt;br /&gt;
+&lt;img src=&#34;demo/2.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;可以看到有一个箱式图的图标，点一下就变成了Boxplot，鼠标房子Box上可以看到参数&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;demo/4.jpeg&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;同样的办法，复制&amp;lt;map代码区并保存为文本文件，比如命名为box.txt,这里其实box和bar的界面结果是一样的，我们在bar里复制，然后使用&lt;code&gt;Oncomine_bar&lt;/code&gt;函数&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt; box&amp;lt;-Oncomine_bar(&amp;#39;/Users/mac/Documents/GitHub/myblog/content/post/2021-08-19-oncomine/box.txt&amp;#39;)
+knitr::kable(box)&lt;/code&gt;&lt;/pre&gt;
+&lt;table&gt;
+&lt;colgroup&gt;
+&lt;col width=&#34;13%&#34; /&gt;
+&lt;col width=&#34;30%&#34; /&gt;
+&lt;col width=&#34;9%&#34; /&gt;
+&lt;col width=&#34;23%&#34; /&gt;
+&lt;col width=&#34;23%&#34; /&gt;
+&lt;/colgroup&gt;
+&lt;thead&gt;
+&lt;tr class=&#34;header&#34;&gt;
+&lt;th align=&#34;right&#34;&gt;Expression value&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Cancer Type&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Sample Name&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Normal Tissue Type&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Legend Value&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;3.509&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Small Cell Carcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4360A3&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;No value&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;No value&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;4.205&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Signet Ring Cell Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T5245A1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;No value&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;No value&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;4.407&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectosigmoid Mucinous Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T940A&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;No value&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;No value&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;4.575&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Small Cell Carcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4360A2&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;No value&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;No value&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;5.109&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectal Signet Ring Cell Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T924C&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;No value&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;No value&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;5.867&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Signet Ring Cell Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T5002A1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;No value&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;No value&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;6.110&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectosigmoid Mucinous Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4980A1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;No value&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;No value&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;0.188&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;N552G&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;0.315&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;N1369A&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;0.533&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;N773A1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;1.020&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;N1102A&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;1.160&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;N2367A&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;2.732&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4452A1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cecum Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cecum Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;2.889&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4550B&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cecum Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cecum Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;2.944&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T902A&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cecum Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cecum Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;3.397&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4834A1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cecum Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cecum Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;3.453&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4354H&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cecum Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cecum Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;4.437&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4544A1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cecum Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cecum Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;4.492&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4926A1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cecum Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cecum Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;4.597&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T5376A1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cecum Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cecum Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;4.623&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4452A2&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cecum Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cecum Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;4.724&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4452A&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cecum Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cecum Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;4.801&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4452A3&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cecum Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cecum Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;5.183&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T5133A&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cecum Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cecum Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;5.315&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4452A4&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cecum Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cecum Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;5.407&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T5024A1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cecum Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cecum Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;5.897&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4573A1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cecum Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cecum Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;5.981&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4984A1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cecum Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cecum Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;6.215&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T5565A1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cecum Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cecum Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;1.644&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T5811A1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;2.586&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4174A&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;2.747&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4701A1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;3.043&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T519A&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;3.377&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T6190A1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;3.553&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T5287A1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;3.634&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4660A1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;3.748&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T573A&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;3.838&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T740A&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;3.877&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4373B1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;3.927&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T5573A1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;3.931&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T826A&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;3.982&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4448A&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;4.052&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4612A1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;4.061&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T5266A1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;4.161&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T433A&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;4.168&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4376A&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;4.173&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T5589B1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;4.188&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4475A1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;4.294&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T5164A1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;4.395&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4956A1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;4.441&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4975A1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;4.478&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T773A1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;4.566&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4373B2&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;4.761&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T949B&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;4.810&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4750A1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;4.857&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4257A&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;4.956&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T801A1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;5.044&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T5162A1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;5.077&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T5389A1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;5.172&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4695A1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;5.241&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4667A1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;5.243&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4508A1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;5.286&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4920A1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;5.330&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T5107B1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;5.614&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4373B3&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;5.638&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4541A1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;5.674&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4489A1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;5.819&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4555A1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;5.852&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T5063A&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;5.959&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T5102A1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;3.001&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T5513A1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Mucinous Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Mucinous Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;3.836&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4948A2&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Mucinous Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Mucinous Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;4.035&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4611B1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Mucinous Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Mucinous Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;4.225&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4799A1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Mucinous Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Mucinous Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;4.389&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T932B1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Mucinous Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Mucinous Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;4.776&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T5536C4&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Mucinous Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Mucinous Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;4.838&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T451A&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Mucinous Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Mucinous Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;4.872&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T5261B1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Mucinous Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Mucinous Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;5.087&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4491A1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Mucinous Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Mucinous Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;5.304&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T694C&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Mucinous Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Mucinous Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;5.676&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4644B1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Mucinous Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Mucinous Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;5.973&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T625A&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Mucinous Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Mucinous Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;6.231&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4491A2&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Mucinous Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Colon Mucinous Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;2.231&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T551C&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectal Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectal Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;2.638&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T645A&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectal Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectal Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;3.811&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T521B&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectal Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectal Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;4.441&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T789A&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectal Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectal Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;4.584&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T74A&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectal Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectal Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;4.669&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T565A&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectal Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectal Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;5.346&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T462A&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectal Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectal Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;5.547&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T420A&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectal Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectal Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;3.798&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4449E4&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectal Mucinous Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectal Mucinous Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;4.233&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4449E3&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectal Mucinous Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectal Mucinous Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;4.360&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4449E1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectal Mucinous Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectal Mucinous Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;4.784&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4449E2&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectal Mucinous Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectal Mucinous Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;2.439&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T5139A1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectosigmoid Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectosigmoid Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;2.922&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4919A1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectosigmoid Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectosigmoid Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;2.983&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T656A&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectosigmoid Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectosigmoid Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;3.072&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T771A&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectosigmoid Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectosigmoid Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;3.404&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T866D&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectosigmoid Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectosigmoid Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;3.846&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T5430A1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectosigmoid Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectosigmoid Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;4.396&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T552G&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectosigmoid Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectosigmoid Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;4.789&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T981A&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectosigmoid Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectosigmoid Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;5.055&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T4603A1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectosigmoid Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectosigmoid Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;5.815&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Cancer&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;T672A&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectosigmoid Adenocarcinoma&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Rectosigmoid Adenocarcinoma&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;我们可以用自带的函数画个图，有两个图，一个是bar_plot，一个是box_plot&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;Oncomine_bar_plot(box)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 载入需要的程辑包：ggplot2&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+## 载入程辑包：&amp;#39;plotly&amp;#39;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## The following object is masked from &amp;#39;package:ggplot2&amp;#39;:
+## 
+##     last_plot&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## The following object is masked from &amp;#39;package:stats&amp;#39;:
+## 
+##     filter&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## The following object is masked from &amp;#39;package:graphics&amp;#39;:
+## 
+##     layout&lt;/code&gt;&lt;/pre&gt;
+&lt;div id=&#34;htmlwidget-1&#34; style=&#34;width:672px;height:480px;&#34; class=&#34;plotly html-widget&#34;&gt;&lt;/div&gt;
+&lt;script type=&#34;application/json&#34; data-for=&#34;htmlwidget-1&#34;&gt;{&#34;x&#34;:{&#34;visdat&#34;:{&#34;50921e545457&#34;:[&#34;function () &#34;,&#34;plotlyVisDat&#34;]},&#34;cur_data&#34;:&#34;50921e545457&#34;,&#34;attrs&#34;:{&#34;50921e545457&#34;:{&#34;x&#34;:{},&#34;y&#34;:{},&#34;text&#34;:[&#34;Expression:  3.509&#34;,&#34;Expression:  4.205&#34;,&#34;Expression:  4.407&#34;,&#34;Expression:  4.575&#34;,&#34;Expression:  5.109&#34;,&#34;Expression:  5.867&#34;,&#34;Expression:  6.11&#34;,&#34;Expression:  0.188&#34;,&#34;Expression:  0.315&#34;,&#34;Expression:  0.533&#34;,&#34;Expression:  1.02&#34;,&#34;Expression:  1.16&#34;,&#34;Expression:  2.732&#34;,&#34;Expression:  2.889&#34;,&#34;Expression:  2.944&#34;,&#34;Expression:  3.397&#34;,&#34;Expression:  3.453&#34;,&#34;Expression:  4.437&#34;,&#34;Expression:  4.492&#34;,&#34;Expression:  4.597&#34;,&#34;Expression:  4.623&#34;,&#34;Expression:  4.724&#34;,&#34;Expression:  4.801&#34;,&#34;Expression:  5.183&#34;,&#34;Expression:  5.315&#34;,&#34;Expression:  5.407&#34;,&#34;Expression:  5.897&#34;,&#34;Expression:  5.981&#34;,&#34;Expression:  6.215&#34;,&#34;Expression:  1.644&#34;,&#34;Expression:  2.586&#34;,&#34;Expression:  2.747&#34;,&#34;Expression:  3.043&#34;,&#34;Expression:  3.377&#34;,&#34;Expression:  3.553&#34;,&#34;Expression:  3.634&#34;,&#34;Expression:  3.748&#34;,&#34;Expression:  3.838&#34;,&#34;Expression:  3.877&#34;,&#34;Expression:  3.927&#34;,&#34;Expression:  3.931&#34;,&#34;Expression:  3.982&#34;,&#34;Expression:  4.052&#34;,&#34;Expression:  4.061&#34;,&#34;Expression:  4.161&#34;,&#34;Expression:  4.168&#34;,&#34;Expression:  4.173&#34;,&#34;Expression:  4.188&#34;,&#34;Expression:  4.294&#34;,&#34;Expression:  4.395&#34;,&#34;Expression:  4.441&#34;,&#34;Expression:  4.478&#34;,&#34;Expression:  4.566&#34;,&#34;Expression:  4.761&#34;,&#34;Expression:  4.81&#34;,&#34;Expression:  4.857&#34;,&#34;Expression:  4.956&#34;,&#34;Expression:  5.044&#34;,&#34;Expression:  5.077&#34;,&#34;Expression:  5.172&#34;,&#34;Expression:  5.241&#34;,&#34;Expression:  5.243&#34;,&#34;Expression:  5.286&#34;,&#34;Expression:  5.33&#34;,&#34;Expression:  5.614&#34;,&#34;Expression:  5.638&#34;,&#34;Expression:  5.674&#34;,&#34;Expression:  5.819&#34;,&#34;Expression:  5.852&#34;,&#34;Expression:  5.959&#34;,&#34;Expression:  3.001&#34;,&#34;Expression:  3.836&#34;,&#34;Expression:  4.035&#34;,&#34;Expression:  4.225&#34;,&#34;Expression:  4.389&#34;,&#34;Expression:  4.776&#34;,&#34;Expression:  4.838&#34;,&#34;Expression:  4.872&#34;,&#34;Expression:  5.087&#34;,&#34;Expression:  5.304&#34;,&#34;Expression:  5.676&#34;,&#34;Expression:  5.973&#34;,&#34;Expression:  6.231&#34;,&#34;Expression:  2.231&#34;,&#34;Expression:  2.638&#34;,&#34;Expression:  3.811&#34;,&#34;Expression:  4.441&#34;,&#34;Expression:  4.584&#34;,&#34;Expression:  4.669&#34;,&#34;Expression:  5.346&#34;,&#34;Expression:  5.547&#34;,&#34;Expression:  3.798&#34;,&#34;Expression:  4.233&#34;,&#34;Expression:  4.36&#34;,&#34;Expression:  4.784&#34;,&#34;Expression:  2.439&#34;,&#34;Expression:  2.922&#34;,&#34;Expression:  2.983&#34;,&#34;Expression:  3.072&#34;,&#34;Expression:  3.404&#34;,&#34;Expression:  3.846&#34;,&#34;Expression:  4.396&#34;,&#34;Expression:  4.789&#34;,&#34;Expression:  5.055&#34;,&#34;Expression:  5.815&#34;],&#34;color&#34;:{},&#34;alpha_stroke&#34;:1,&#34;sizes&#34;:[10,100],&#34;spans&#34;:[1,20],&#34;type&#34;:&#34;bar&#34;}},&#34;layout&#34;:{&#34;margin&#34;:{&#34;b&#34;:40,&#34;l&#34;:60,&#34;t&#34;:25,&#34;r&#34;:10},&#34;title&#34;:&#34;&lt;b&gt;Bar plot&lt;\/b&gt;&#34;,&#34;xaxis&#34;:{&#34;domain&#34;:[0,1],&#34;automargin&#34;:true,&#34;title&#34;:&#34;`Sample Name`&#34;,&#34;type&#34;:&#34;category&#34;,&#34;categoryorder&#34;:&#34;array&#34;,&#34;categoryarray&#34;:[&#34;T4360A3&#34;,&#34;T5245A1&#34;,&#34;T940A&#34;,&#34;T4360A2&#34;,&#34;T924C&#34;,&#34;T5002A1&#34;,&#34;T4980A1&#34;,&#34;N552G&#34;,&#34;N1369A&#34;,&#34;N773A1&#34;,&#34;N1102A&#34;,&#34;N2367A&#34;,&#34;T4452A1&#34;,&#34;T4550B&#34;,&#34;T902A&#34;,&#34;T4834A1&#34;,&#34;T4354H&#34;,&#34;T4544A1&#34;,&#34;T4926A1&#34;,&#34;T5376A1&#34;,&#34;T4452A2&#34;,&#34;T4452A&#34;,&#34;T4452A3&#34;,&#34;T5133A&#34;,&#34;T4452A4&#34;,&#34;T5024A1&#34;,&#34;T4573A1&#34;,&#34;T4984A1&#34;,&#34;T5565A1&#34;,&#34;T5811A1&#34;,&#34;T4174A&#34;,&#34;T4701A1&#34;,&#34;T519A&#34;,&#34;T6190A1&#34;,&#34;T5287A1&#34;,&#34;T4660A1&#34;,&#34;T573A&#34;,&#34;T740A&#34;,&#34;T4373B1&#34;,&#34;T5573A1&#34;,&#34;T826A&#34;,&#34;T4448A&#34;,&#34;T4612A1&#34;,&#34;T5266A1&#34;,&#34;T433A&#34;,&#34;T4376A&#34;,&#34;T5589B1&#34;,&#34;T4475A1&#34;,&#34;T5164A1&#34;,&#34;T4956A1&#34;,&#34;T4975A1&#34;,&#34;T773A1&#34;,&#34;T4373B2&#34;,&#34;T949B&#34;,&#34;T4750A1&#34;,&#34;T4257A&#34;,&#34;T801A1&#34;,&#34;T5162A1&#34;,&#34;T5389A1&#34;,&#34;T4695A1&#34;,&#34;T4667A1&#34;,&#34;T4508A1&#34;,&#34;T4920A1&#34;,&#34;T5107B1&#34;,&#34;T4373B3&#34;,&#34;T4541A1&#34;,&#34;T4489A1&#34;,&#34;T4555A1&#34;,&#34;T5063A&#34;,&#34;T5102A1&#34;,&#34;T5513A1&#34;,&#34;T4948A2&#34;,&#34;T4611B1&#34;,&#34;T4799A1&#34;,&#34;T932B1&#34;,&#34;T5536C4&#34;,&#34;T451A&#34;,&#34;T5261B1&#34;,&#34;T4491A1&#34;,&#34;T694C&#34;,&#34;T4644B1&#34;,&#34;T625A&#34;,&#34;T4491A2&#34;,&#34;T551C&#34;,&#34;T645A&#34;,&#34;T521B&#34;,&#34;T789A&#34;,&#34;T74A&#34;,&#34;T565A&#34;,&#34;T462A&#34;,&#34;T420A&#34;,&#34;T4449E4&#34;,&#34;T4449E3&#34;,&#34;T4449E1&#34;,&#34;T4449E2&#34;,&#34;T5139A1&#34;,&#34;T4919A1&#34;,&#34;T656A&#34;,&#34;T771A&#34;,&#34;T866D&#34;,&#34;T5430A1&#34;,&#34;T552G&#34;,&#34;T981A&#34;,&#34;T4603A1&#34;,&#34;T672A&#34;]},&#34;yaxis&#34;:{&#34;domain&#34;:[0,1],&#34;automargin&#34;:true,&#34;title&#34;:&#34;`Expression value`&#34;},&#34;hovermode&#34;:&#34;closest&#34;,&#34;showlegend&#34;:true},&#34;source&#34;:&#34;A&#34;,&#34;config&#34;:{&#34;showSendToCloud&#34;:false},&#34;data&#34;:[{&#34;x&#34;:[&#34;T4360A3&#34;,&#34;T5245A1&#34;,&#34;T940A&#34;,&#34;T4360A2&#34;,&#34;T924C&#34;,&#34;T5002A1&#34;,&#34;T4980A1&#34;],&#34;y&#34;:[3.509,4.205,4.407,4.575,5.109,5.867,6.11],&#34;text&#34;:[&#34;Expression:  3.509&#34;,&#34;Expression:  4.205&#34;,&#34;Expression:  4.407&#34;,&#34;Expression:  4.575&#34;,&#34;Expression:  5.109&#34;,&#34;Expression:  5.867&#34;,&#34;Expression:  6.11&#34;],&#34;type&#34;:&#34;bar&#34;,&#34;name&#34;:&#34;No value&#34;,&#34;marker&#34;:{&#34;color&#34;:&#34;rgba(102,194,165,1)&#34;,&#34;line&#34;:{&#34;color&#34;:&#34;rgba(102,194,165,1)&#34;}},&#34;textfont&#34;:{&#34;color&#34;:&#34;rgba(102,194,165,1)&#34;},&#34;error_y&#34;:{&#34;color&#34;:&#34;rgba(102,194,165,1)&#34;},&#34;error_x&#34;:{&#34;color&#34;:&#34;rgba(102,194,165,1)&#34;},&#34;xaxis&#34;:&#34;x&#34;,&#34;yaxis&#34;:&#34;y&#34;,&#34;frame&#34;:null},{&#34;x&#34;:[&#34;N552G&#34;,&#34;N1369A&#34;,&#34;N773A1&#34;,&#34;N1102A&#34;,&#34;N2367A&#34;],&#34;y&#34;:[0.188,0.315,0.533,1.02,1.16],&#34;text&#34;:[&#34;Expression:  0.188&#34;,&#34;Expression:  0.315&#34;,&#34;Expression:  0.533&#34;,&#34;Expression:  1.02&#34;,&#34;Expression:  1.16&#34;],&#34;type&#34;:&#34;bar&#34;,&#34;name&#34;:&#34;Colon&#34;,&#34;marker&#34;:{&#34;color&#34;:&#34;rgba(252,141,98,1)&#34;,&#34;line&#34;:{&#34;color&#34;:&#34;rgba(252,141,98,1)&#34;}},&#34;textfont&#34;:{&#34;color&#34;:&#34;rgba(252,141,98,1)&#34;},&#34;error_y&#34;:{&#34;color&#34;:&#34;rgba(252,141,98,1)&#34;},&#34;error_x&#34;:{&#34;color&#34;:&#34;rgba(252,141,98,1)&#34;},&#34;xaxis&#34;:&#34;x&#34;,&#34;yaxis&#34;:&#34;y&#34;,&#34;frame&#34;:null},{&#34;x&#34;:[&#34;T4452A1&#34;,&#34;T4550B&#34;,&#34;T902A&#34;,&#34;T4834A1&#34;,&#34;T4354H&#34;,&#34;T4544A1&#34;,&#34;T4926A1&#34;,&#34;T5376A1&#34;,&#34;T4452A2&#34;,&#34;T4452A&#34;,&#34;T4452A3&#34;,&#34;T5133A&#34;,&#34;T4452A4&#34;,&#34;T5024A1&#34;,&#34;T4573A1&#34;,&#34;T4984A1&#34;,&#34;T5565A1&#34;],&#34;y&#34;:[2.732,2.889,2.944,3.397,3.453,4.437,4.492,4.597,4.623,4.724,4.801,5.183,5.315,5.407,5.897,5.981,6.215],&#34;text&#34;:[&#34;Expression:  2.732&#34;,&#34;Expression:  2.889&#34;,&#34;Expression:  2.944&#34;,&#34;Expression:  3.397&#34;,&#34;Expression:  3.453&#34;,&#34;Expression:  4.437&#34;,&#34;Expression:  4.492&#34;,&#34;Expression:  4.597&#34;,&#34;Expression:  4.623&#34;,&#34;Expression:  4.724&#34;,&#34;Expression:  4.801&#34;,&#34;Expression:  5.183&#34;,&#34;Expression:  5.315&#34;,&#34;Expression:  5.407&#34;,&#34;Expression:  5.897&#34;,&#34;Expression:  5.981&#34;,&#34;Expression:  6.215&#34;],&#34;type&#34;:&#34;bar&#34;,&#34;name&#34;:&#34;Cecum Adenocarcinoma&#34;,&#34;marker&#34;:{&#34;color&#34;:&#34;rgba(141,160,203,1)&#34;,&#34;line&#34;:{&#34;color&#34;:&#34;rgba(141,160,203,1)&#34;}},&#34;textfont&#34;:{&#34;color&#34;:&#34;rgba(141,160,203,1)&#34;},&#34;error_y&#34;:{&#34;color&#34;:&#34;rgba(141,160,203,1)&#34;},&#34;error_x&#34;:{&#34;color&#34;:&#34;rgba(141,160,203,1)&#34;},&#34;xaxis&#34;:&#34;x&#34;,&#34;yaxis&#34;:&#34;y&#34;,&#34;frame&#34;:null},{&#34;x&#34;:[&#34;T5811A1&#34;,&#34;T4174A&#34;,&#34;T4701A1&#34;,&#34;T519A&#34;,&#34;T6190A1&#34;,&#34;T5287A1&#34;,&#34;T4660A1&#34;,&#34;T573A&#34;,&#34;T740A&#34;,&#34;T4373B1&#34;,&#34;T5573A1&#34;,&#34;T826A&#34;,&#34;T4448A&#34;,&#34;T4612A1&#34;,&#34;T5266A1&#34;,&#34;T433A&#34;,&#34;T4376A&#34;,&#34;T5589B1&#34;,&#34;T4475A1&#34;,&#34;T5164A1&#34;,&#34;T4956A1&#34;,&#34;T4975A1&#34;,&#34;T773A1&#34;,&#34;T4373B2&#34;,&#34;T949B&#34;,&#34;T4750A1&#34;,&#34;T4257A&#34;,&#34;T801A1&#34;,&#34;T5162A1&#34;,&#34;T5389A1&#34;,&#34;T4695A1&#34;,&#34;T4667A1&#34;,&#34;T4508A1&#34;,&#34;T4920A1&#34;,&#34;T5107B1&#34;,&#34;T4373B3&#34;,&#34;T4541A1&#34;,&#34;T4489A1&#34;,&#34;T4555A1&#34;,&#34;T5063A&#34;,&#34;T5102A1&#34;],&#34;y&#34;:[1.644,2.586,2.747,3.043,3.377,3.553,3.634,3.748,3.838,3.877,3.927,3.931,3.982,4.052,4.061,4.161,4.168,4.173,4.188,4.294,4.395,4.441,4.478,4.566,4.761,4.81,4.857,4.956,5.044,5.077,5.172,5.241,5.243,5.286,5.33,5.614,5.638,5.674,5.819,5.852,5.959],&#34;text&#34;:[&#34;Expression:  1.644&#34;,&#34;Expression:  2.586&#34;,&#34;Expression:  2.747&#34;,&#34;Expression:  3.043&#34;,&#34;Expression:  3.377&#34;,&#34;Expression:  3.553&#34;,&#34;Expression:  3.634&#34;,&#34;Expression:  3.748&#34;,&#34;Expression:  3.838&#34;,&#34;Expression:  3.877&#34;,&#34;Expression:  3.927&#34;,&#34;Expression:  3.931&#34;,&#34;Expression:  3.982&#34;,&#34;Expression:  4.052&#34;,&#34;Expression:  4.061&#34;,&#34;Expression:  4.161&#34;,&#34;Expression:  4.168&#34;,&#34;Expression:  4.173&#34;,&#34;Expression:  4.188&#34;,&#34;Expression:  4.294&#34;,&#34;Expression:  4.395&#34;,&#34;Expression:  4.441&#34;,&#34;Expression:  4.478&#34;,&#34;Expression:  4.566&#34;,&#34;Expression:  4.761&#34;,&#34;Expression:  4.81&#34;,&#34;Expression:  4.857&#34;,&#34;Expression:  4.956&#34;,&#34;Expression:  5.044&#34;,&#34;Expression:  5.077&#34;,&#34;Expression:  5.172&#34;,&#34;Expression:  5.241&#34;,&#34;Expression:  5.243&#34;,&#34;Expression:  5.286&#34;,&#34;Expression:  5.33&#34;,&#34;Expression:  5.614&#34;,&#34;Expression:  5.638&#34;,&#34;Expression:  5.674&#34;,&#34;Expression:  5.819&#34;,&#34;Expression:  5.852&#34;,&#34;Expression:  5.959&#34;],&#34;type&#34;:&#34;bar&#34;,&#34;name&#34;:&#34;Colon Adenocarcinoma&#34;,&#34;marker&#34;:{&#34;color&#34;:&#34;rgba(231,138,195,1)&#34;,&#34;line&#34;:{&#34;color&#34;:&#34;rgba(231,138,195,1)&#34;}},&#34;textfont&#34;:{&#34;color&#34;:&#34;rgba(231,138,195,1)&#34;},&#34;error_y&#34;:{&#34;color&#34;:&#34;rgba(231,138,195,1)&#34;},&#34;error_x&#34;:{&#34;color&#34;:&#34;rgba(231,138,195,1)&#34;},&#34;xaxis&#34;:&#34;x&#34;,&#34;yaxis&#34;:&#34;y&#34;,&#34;frame&#34;:null},{&#34;x&#34;:[&#34;T5513A1&#34;,&#34;T4948A2&#34;,&#34;T4611B1&#34;,&#34;T4799A1&#34;,&#34;T932B1&#34;,&#34;T5536C4&#34;,&#34;T451A&#34;,&#34;T5261B1&#34;,&#34;T4491A1&#34;,&#34;T694C&#34;,&#34;T4644B1&#34;,&#34;T625A&#34;,&#34;T4491A2&#34;],&#34;y&#34;:[3.001,3.836,4.035,4.225,4.389,4.776,4.838,4.872,5.087,5.304,5.676,5.973,6.231],&#34;text&#34;:[&#34;Expression:  3.001&#34;,&#34;Expression:  3.836&#34;,&#34;Expression:  4.035&#34;,&#34;Expression:  4.225&#34;,&#34;Expression:  4.389&#34;,&#34;Expression:  4.776&#34;,&#34;Expression:  4.838&#34;,&#34;Expression:  4.872&#34;,&#34;Expression:  5.087&#34;,&#34;Expression:  5.304&#34;,&#34;Expression:  5.676&#34;,&#34;Expression:  5.973&#34;,&#34;Expression:  6.231&#34;],&#34;type&#34;:&#34;bar&#34;,&#34;name&#34;:&#34;Colon Mucinous Adenocarcinoma&#34;,&#34;marker&#34;:{&#34;color&#34;:&#34;rgba(166,216,84,1)&#34;,&#34;line&#34;:{&#34;color&#34;:&#34;rgba(166,216,84,1)&#34;}},&#34;textfont&#34;:{&#34;color&#34;:&#34;rgba(166,216,84,1)&#34;},&#34;error_y&#34;:{&#34;color&#34;:&#34;rgba(166,216,84,1)&#34;},&#34;error_x&#34;:{&#34;color&#34;:&#34;rgba(166,216,84,1)&#34;},&#34;xaxis&#34;:&#34;x&#34;,&#34;yaxis&#34;:&#34;y&#34;,&#34;frame&#34;:null},{&#34;x&#34;:[&#34;T551C&#34;,&#34;T645A&#34;,&#34;T521B&#34;,&#34;T789A&#34;,&#34;T74A&#34;,&#34;T565A&#34;,&#34;T462A&#34;,&#34;T420A&#34;],&#34;y&#34;:[2.231,2.638,3.811,4.441,4.584,4.669,5.346,5.547],&#34;text&#34;:[&#34;Expression:  2.231&#34;,&#34;Expression:  2.638&#34;,&#34;Expression:  3.811&#34;,&#34;Expression:  4.441&#34;,&#34;Expression:  4.584&#34;,&#34;Expression:  4.669&#34;,&#34;Expression:  5.346&#34;,&#34;Expression:  5.547&#34;],&#34;type&#34;:&#34;bar&#34;,&#34;name&#34;:&#34;Rectal Adenocarcinoma&#34;,&#34;marker&#34;:{&#34;color&#34;:&#34;rgba(255,217,47,1)&#34;,&#34;line&#34;:{&#34;color&#34;:&#34;rgba(255,217,47,1)&#34;}},&#34;textfont&#34;:{&#34;color&#34;:&#34;rgba(255,217,47,1)&#34;},&#34;error_y&#34;:{&#34;color&#34;:&#34;rgba(255,217,47,1)&#34;},&#34;error_x&#34;:{&#34;color&#34;:&#34;rgba(255,217,47,1)&#34;},&#34;xaxis&#34;:&#34;x&#34;,&#34;yaxis&#34;:&#34;y&#34;,&#34;frame&#34;:null},{&#34;x&#34;:[&#34;T4449E4&#34;,&#34;T4449E3&#34;,&#34;T4449E1&#34;,&#34;T4449E2&#34;],&#34;y&#34;:[3.798,4.233,4.36,4.784],&#34;text&#34;:[&#34;Expression:  3.798&#34;,&#34;Expression:  4.233&#34;,&#34;Expression:  4.36&#34;,&#34;Expression:  4.784&#34;],&#34;type&#34;:&#34;bar&#34;,&#34;name&#34;:&#34;Rectal Mucinous Adenocarcinoma&#34;,&#34;marker&#34;:{&#34;color&#34;:&#34;rgba(229,196,148,1)&#34;,&#34;line&#34;:{&#34;color&#34;:&#34;rgba(229,196,148,1)&#34;}},&#34;textfont&#34;:{&#34;color&#34;:&#34;rgba(229,196,148,1)&#34;},&#34;error_y&#34;:{&#34;color&#34;:&#34;rgba(229,196,148,1)&#34;},&#34;error_x&#34;:{&#34;color&#34;:&#34;rgba(229,196,148,1)&#34;},&#34;xaxis&#34;:&#34;x&#34;,&#34;yaxis&#34;:&#34;y&#34;,&#34;frame&#34;:null},{&#34;x&#34;:[&#34;T5139A1&#34;,&#34;T4919A1&#34;,&#34;T656A&#34;,&#34;T771A&#34;,&#34;T866D&#34;,&#34;T5430A1&#34;,&#34;T552G&#34;,&#34;T981A&#34;,&#34;T4603A1&#34;,&#34;T672A&#34;],&#34;y&#34;:[2.439,2.922,2.983,3.072,3.404,3.846,4.396,4.789,5.055,5.815],&#34;text&#34;:[&#34;Expression:  2.439&#34;,&#34;Expression:  2.922&#34;,&#34;Expression:  2.983&#34;,&#34;Expression:  3.072&#34;,&#34;Expression:  3.404&#34;,&#34;Expression:  3.846&#34;,&#34;Expression:  4.396&#34;,&#34;Expression:  4.789&#34;,&#34;Expression:  5.055&#34;,&#34;Expression:  5.815&#34;],&#34;type&#34;:&#34;bar&#34;,&#34;name&#34;:&#34;Rectosigmoid Adenocarcinoma&#34;,&#34;marker&#34;:{&#34;color&#34;:&#34;rgba(179,179,179,1)&#34;,&#34;line&#34;:{&#34;color&#34;:&#34;rgba(179,179,179,1)&#34;}},&#34;textfont&#34;:{&#34;color&#34;:&#34;rgba(179,179,179,1)&#34;},&#34;error_y&#34;:{&#34;color&#34;:&#34;rgba(179,179,179,1)&#34;},&#34;error_x&#34;:{&#34;color&#34;:&#34;rgba(179,179,179,1)&#34;},&#34;xaxis&#34;:&#34;x&#34;,&#34;yaxis&#34;:&#34;y&#34;,&#34;frame&#34;:null}],&#34;highlight&#34;:{&#34;on&#34;:&#34;plotly_click&#34;,&#34;persistent&#34;:false,&#34;dynamic&#34;:false,&#34;selectize&#34;:false,&#34;opacityDim&#34;:0.2,&#34;selected&#34;:{&#34;opacity&#34;:1},&#34;debounce&#34;:0},&#34;shinyEvents&#34;:[&#34;plotly_hover&#34;,&#34;plotly_click&#34;,&#34;plotly_selected&#34;,&#34;plotly_relayout&#34;,&#34;plotly_brushed&#34;,&#34;plotly_brushing&#34;,&#34;plotly_clickannotation&#34;,&#34;plotly_doubleclick&#34;,&#34;plotly_deselect&#34;,&#34;plotly_afterplot&#34;,&#34;plotly_sunburstclick&#34;],&#34;base_url&#34;:&#34;https://plot.ly&#34;},&#34;evals&#34;:[],&#34;jsHooks&#34;:[]}&lt;/script&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;Oncomine_box_plot(box)&lt;/code&gt;&lt;/pre&gt;
+&lt;div id=&#34;htmlwidget-2&#34; style=&#34;width:672px;height:480px;&#34; class=&#34;plotly html-widget&#34;&gt;&lt;/div&gt;
+&lt;script type=&#34;application/json&#34; data-for=&#34;htmlwidget-2&#34;&gt;{&#34;x&#34;:{&#34;visdat&#34;:{&#34;50921d366966&#34;:[&#34;function () &#34;,&#34;plotlyVisDat&#34;]},&#34;cur_data&#34;:&#34;50921d366966&#34;,&#34;attrs&#34;:{&#34;50921d366966&#34;:{&#34;x&#34;:{},&#34;y&#34;:{},&#34;color&#34;:{},&#34;alpha_stroke&#34;:1,&#34;sizes&#34;:[10,100],&#34;spans&#34;:[1,20],&#34;type&#34;:&#34;box&#34;}},&#34;layout&#34;:{&#34;margin&#34;:{&#34;b&#34;:40,&#34;l&#34;:60,&#34;t&#34;:25,&#34;r&#34;:10},&#34;title&#34;:&#34;Box Plot&#34;,&#34;xaxis&#34;:{&#34;domain&#34;:[0,1],&#34;automargin&#34;:true,&#34;title&#34;:&#34;Legend Value&#34;,&#34;type&#34;:&#34;category&#34;,&#34;categoryorder&#34;:&#34;array&#34;,&#34;categoryarray&#34;:[&#34;Cecum Adenocarcinoma&#34;,&#34;Colon&#34;,&#34;Colon Adenocarcinoma&#34;,&#34;Colon Mucinous Adenocarcinoma&#34;,&#34;No value&#34;,&#34;Rectal Adenocarcinoma&#34;,&#34;Rectal Mucinous Adenocarcinoma&#34;,&#34;Rectosigmoid Adenocarcinoma&#34;]},&#34;yaxis&#34;:{&#34;domain&#34;:[0,1],&#34;automargin&#34;:true,&#34;title&#34;:&#34;Expression value&#34;},&#34;hovermode&#34;:&#34;closest&#34;,&#34;showlegend&#34;:true},&#34;source&#34;:&#34;A&#34;,&#34;config&#34;:{&#34;showSendToCloud&#34;:false},&#34;data&#34;:[{&#34;fillcolor&#34;:&#34;rgba(102,194,165,0.5)&#34;,&#34;x&#34;:[&#34;Cecum Adenocarcinoma&#34;,&#34;Cecum Adenocarcinoma&#34;,&#34;Cecum Adenocarcinoma&#34;,&#34;Cecum Adenocarcinoma&#34;,&#34;Cecum Adenocarcinoma&#34;,&#34;Cecum Adenocarcinoma&#34;,&#34;Cecum Adenocarcinoma&#34;,&#34;Cecum Adenocarcinoma&#34;,&#34;Cecum Adenocarcinoma&#34;,&#34;Cecum Adenocarcinoma&#34;,&#34;Cecum Adenocarcinoma&#34;,&#34;Cecum Adenocarcinoma&#34;,&#34;Cecum Adenocarcinoma&#34;,&#34;Cecum Adenocarcinoma&#34;,&#34;Cecum Adenocarcinoma&#34;,&#34;Cecum Adenocarcinoma&#34;,&#34;Cecum Adenocarcinoma&#34;],&#34;y&#34;:[2.732,2.889,2.944,3.397,3.453,4.437,4.492,4.597,4.623,4.724,4.801,5.183,5.315,5.407,5.897,5.981,6.215],&#34;type&#34;:&#34;box&#34;,&#34;name&#34;:&#34;Cecum Adenocarcinoma&#34;,&#34;marker&#34;:{&#34;color&#34;:&#34;rgba(102,194,165,1)&#34;,&#34;line&#34;:{&#34;color&#34;:&#34;rgba(102,194,165,1)&#34;}},&#34;line&#34;:{&#34;color&#34;:&#34;rgba(102,194,165,1)&#34;},&#34;xaxis&#34;:&#34;x&#34;,&#34;yaxis&#34;:&#34;y&#34;,&#34;frame&#34;:null},{&#34;fillcolor&#34;:&#34;rgba(252,141,98,0.5)&#34;,&#34;x&#34;:[&#34;Colon&#34;,&#34;Colon&#34;,&#34;Colon&#34;,&#34;Colon&#34;,&#34;Colon&#34;],&#34;y&#34;:[0.188,0.315,0.533,1.02,1.16],&#34;type&#34;:&#34;box&#34;,&#34;name&#34;:&#34;Colon&#34;,&#34;marker&#34;:{&#34;color&#34;:&#34;rgba(252,141,98,1)&#34;,&#34;line&#34;:{&#34;color&#34;:&#34;rgba(252,141,98,1)&#34;}},&#34;line&#34;:{&#34;color&#34;:&#34;rgba(252,141,98,1)&#34;},&#34;xaxis&#34;:&#34;x&#34;,&#34;yaxis&#34;:&#34;y&#34;,&#34;frame&#34;:null},{&#34;fillcolor&#34;:&#34;rgba(141,160,203,0.5)&#34;,&#34;x&#34;:[&#34;Colon Adenocarcinoma&#34;,&#34;Colon Adenocarcinoma&#34;,&#34;Colon Adenocarcinoma&#34;,&#34;Colon Adenocarcinoma&#34;,&#34;Colon Adenocarcinoma&#34;,&#34;Colon Adenocarcinoma&#34;,&#34;Colon Adenocarcinoma&#34;,&#34;Colon Adenocarcinoma&#34;,&#34;Colon Adenocarcinoma&#34;,&#34;Colon Adenocarcinoma&#34;,&#34;Colon Adenocarcinoma&#34;,&#34;Colon Adenocarcinoma&#34;,&#34;Colon Adenocarcinoma&#34;,&#34;Colon Adenocarcinoma&#34;,&#34;Colon Adenocarcinoma&#34;,&#34;Colon Adenocarcinoma&#34;,&#34;Colon Adenocarcinoma&#34;,&#34;Colon Adenocarcinoma&#34;,&#34;Colon Adenocarcinoma&#34;,&#34;Colon Adenocarcinoma&#34;,&#34;Colon Adenocarcinoma&#34;,&#34;Colon Adenocarcinoma&#34;,&#34;Colon Adenocarcinoma&#34;,&#34;Colon Adenocarcinoma&#34;,&#34;Colon Adenocarcinoma&#34;,&#34;Colon Adenocarcinoma&#34;,&#34;Colon Adenocarcinoma&#34;,&#34;Colon Adenocarcinoma&#34;,&#34;Colon Adenocarcinoma&#34;,&#34;Colon Adenocarcinoma&#34;,&#34;Colon Adenocarcinoma&#34;,&#34;Colon Adenocarcinoma&#34;,&#34;Colon Adenocarcinoma&#34;,&#34;Colon Adenocarcinoma&#34;,&#34;Colon Adenocarcinoma&#34;,&#34;Colon Adenocarcinoma&#34;,&#34;Colon Adenocarcinoma&#34;,&#34;Colon Adenocarcinoma&#34;,&#34;Colon Adenocarcinoma&#34;,&#34;Colon Adenocarcinoma&#34;,&#34;Colon Adenocarcinoma&#34;],&#34;y&#34;:[1.644,2.586,2.747,3.043,3.377,3.553,3.634,3.748,3.838,3.877,3.927,3.931,3.982,4.052,4.061,4.161,4.168,4.173,4.188,4.294,4.395,4.441,4.478,4.566,4.761,4.81,4.857,4.956,5.044,5.077,5.172,5.241,5.243,5.286,5.33,5.614,5.638,5.674,5.819,5.852,5.959],&#34;type&#34;:&#34;box&#34;,&#34;name&#34;:&#34;Colon Adenocarcinoma&#34;,&#34;marker&#34;:{&#34;color&#34;:&#34;rgba(141,160,203,1)&#34;,&#34;line&#34;:{&#34;color&#34;:&#34;rgba(141,160,203,1)&#34;}},&#34;line&#34;:{&#34;color&#34;:&#34;rgba(141,160,203,1)&#34;},&#34;xaxis&#34;:&#34;x&#34;,&#34;yaxis&#34;:&#34;y&#34;,&#34;frame&#34;:null},{&#34;fillcolor&#34;:&#34;rgba(231,138,195,0.5)&#34;,&#34;x&#34;:[&#34;Colon Mucinous Adenocarcinoma&#34;,&#34;Colon Mucinous Adenocarcinoma&#34;,&#34;Colon Mucinous Adenocarcinoma&#34;,&#34;Colon Mucinous Adenocarcinoma&#34;,&#34;Colon Mucinous Adenocarcinoma&#34;,&#34;Colon Mucinous Adenocarcinoma&#34;,&#34;Colon Mucinous Adenocarcinoma&#34;,&#34;Colon Mucinous Adenocarcinoma&#34;,&#34;Colon Mucinous Adenocarcinoma&#34;,&#34;Colon Mucinous Adenocarcinoma&#34;,&#34;Colon Mucinous Adenocarcinoma&#34;,&#34;Colon Mucinous Adenocarcinoma&#34;,&#34;Colon Mucinous Adenocarcinoma&#34;],&#34;y&#34;:[3.001,3.836,4.035,4.225,4.389,4.776,4.838,4.872,5.087,5.304,5.676,5.973,6.231],&#34;type&#34;:&#34;box&#34;,&#34;name&#34;:&#34;Colon Mucinous Adenocarcinoma&#34;,&#34;marker&#34;:{&#34;color&#34;:&#34;rgba(231,138,195,1)&#34;,&#34;line&#34;:{&#34;color&#34;:&#34;rgba(231,138,195,1)&#34;}},&#34;line&#34;:{&#34;color&#34;:&#34;rgba(231,138,195,1)&#34;},&#34;xaxis&#34;:&#34;x&#34;,&#34;yaxis&#34;:&#34;y&#34;,&#34;frame&#34;:null},{&#34;fillcolor&#34;:&#34;rgba(166,216,84,0.5)&#34;,&#34;x&#34;:[&#34;No value&#34;,&#34;No value&#34;,&#34;No value&#34;,&#34;No value&#34;,&#34;No value&#34;,&#34;No value&#34;,&#34;No value&#34;],&#34;y&#34;:[3.509,4.205,4.407,4.575,5.109,5.867,6.11],&#34;type&#34;:&#34;box&#34;,&#34;name&#34;:&#34;No value&#34;,&#34;marker&#34;:{&#34;color&#34;:&#34;rgba(166,216,84,1)&#34;,&#34;line&#34;:{&#34;color&#34;:&#34;rgba(166,216,84,1)&#34;}},&#34;line&#34;:{&#34;color&#34;:&#34;rgba(166,216,84,1)&#34;},&#34;xaxis&#34;:&#34;x&#34;,&#34;yaxis&#34;:&#34;y&#34;,&#34;frame&#34;:null},{&#34;fillcolor&#34;:&#34;rgba(255,217,47,0.5)&#34;,&#34;x&#34;:[&#34;Rectal Adenocarcinoma&#34;,&#34;Rectal Adenocarcinoma&#34;,&#34;Rectal Adenocarcinoma&#34;,&#34;Rectal Adenocarcinoma&#34;,&#34;Rectal Adenocarcinoma&#34;,&#34;Rectal Adenocarcinoma&#34;,&#34;Rectal Adenocarcinoma&#34;,&#34;Rectal Adenocarcinoma&#34;],&#34;y&#34;:[2.231,2.638,3.811,4.441,4.584,4.669,5.346,5.547],&#34;type&#34;:&#34;box&#34;,&#34;name&#34;:&#34;Rectal Adenocarcinoma&#34;,&#34;marker&#34;:{&#34;color&#34;:&#34;rgba(255,217,47,1)&#34;,&#34;line&#34;:{&#34;color&#34;:&#34;rgba(255,217,47,1)&#34;}},&#34;line&#34;:{&#34;color&#34;:&#34;rgba(255,217,47,1)&#34;},&#34;xaxis&#34;:&#34;x&#34;,&#34;yaxis&#34;:&#34;y&#34;,&#34;frame&#34;:null},{&#34;fillcolor&#34;:&#34;rgba(229,196,148,0.5)&#34;,&#34;x&#34;:[&#34;Rectal Mucinous Adenocarcinoma&#34;,&#34;Rectal Mucinous Adenocarcinoma&#34;,&#34;Rectal Mucinous Adenocarcinoma&#34;,&#34;Rectal Mucinous Adenocarcinoma&#34;],&#34;y&#34;:[3.798,4.233,4.36,4.784],&#34;type&#34;:&#34;box&#34;,&#34;name&#34;:&#34;Rectal Mucinous Adenocarcinoma&#34;,&#34;marker&#34;:{&#34;color&#34;:&#34;rgba(229,196,148,1)&#34;,&#34;line&#34;:{&#34;color&#34;:&#34;rgba(229,196,148,1)&#34;}},&#34;line&#34;:{&#34;color&#34;:&#34;rgba(229,196,148,1)&#34;},&#34;xaxis&#34;:&#34;x&#34;,&#34;yaxis&#34;:&#34;y&#34;,&#34;frame&#34;:null},{&#34;fillcolor&#34;:&#34;rgba(179,179,179,0.5)&#34;,&#34;x&#34;:[&#34;Rectosigmoid Adenocarcinoma&#34;,&#34;Rectosigmoid Adenocarcinoma&#34;,&#34;Rectosigmoid Adenocarcinoma&#34;,&#34;Rectosigmoid Adenocarcinoma&#34;,&#34;Rectosigmoid Adenocarcinoma&#34;,&#34;Rectosigmoid Adenocarcinoma&#34;,&#34;Rectosigmoid Adenocarcinoma&#34;,&#34;Rectosigmoid Adenocarcinoma&#34;,&#34;Rectosigmoid Adenocarcinoma&#34;,&#34;Rectosigmoid Adenocarcinoma&#34;],&#34;y&#34;:[2.439,2.922,2.983,3.072,3.404,3.846,4.396,4.789,5.055,5.815],&#34;type&#34;:&#34;box&#34;,&#34;name&#34;:&#34;Rectosigmoid Adenocarcinoma&#34;,&#34;marker&#34;:{&#34;color&#34;:&#34;rgba(179,179,179,1)&#34;,&#34;line&#34;:{&#34;color&#34;:&#34;rgba(179,179,179,1)&#34;}},&#34;line&#34;:{&#34;color&#34;:&#34;rgba(179,179,179,1)&#34;},&#34;xaxis&#34;:&#34;x&#34;,&#34;yaxis&#34;:&#34;y&#34;,&#34;frame&#34;:null}],&#34;highlight&#34;:{&#34;on&#34;:&#34;plotly_click&#34;,&#34;persistent&#34;:false,&#34;dynamic&#34;:false,&#34;selectize&#34;:false,&#34;opacityDim&#34;:0.2,&#34;selected&#34;:{&#34;opacity&#34;:1},&#34;debounce&#34;:0},&#34;shinyEvents&#34;:[&#34;plotly_hover&#34;,&#34;plotly_click&#34;,&#34;plotly_selected&#34;,&#34;plotly_relayout&#34;,&#34;plotly_brushed&#34;,&#34;plotly_brushing&#34;,&#34;plotly_clickannotation&#34;,&#34;plotly_doubleclick&#34;,&#34;plotly_deselect&#34;,&#34;plotly_afterplot&#34;,&#34;plotly_sunburstclick&#34;],&#34;base_url&#34;:&#34;https://plot.ly&#34;},&#34;evals&#34;:[],&#34;jsHooks&#34;:[]}&lt;/script&gt;
+&lt;pre&gt;&lt;code&gt;
+当然我们也可以用ggplot2作图
+
+
+```r
+library(ggplot2) 
+ggplot(box,aes(`Cancer Type`,`Expression value`,color=`Cancer Type`))+
+  geom_boxplot()+
+  theme_bw(base_size = 12)+
+  theme(axis.text.x = element_text(angle=90, hjust=1, vjust=.5))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://swcyo.netlify.app/post/oncomine/index_files/figure-html/unnamed-chunk-6-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>如何准确的使用R进行两独立样本的显著性检验，T检验？非参数检验？</title>
+      <link>https://swcyo.netlify.app/post/torwilcoxon/</link>
+      <pubDate>Thu, 19 Aug 2021 00:00:00 +0000</pubDate>
+      <guid>https://swcyo.netlify.app/post/torwilcoxon/</guid>
+      <description>
+&lt;script src=&#34;https://swcyo.netlify.app/post/torwilcoxon/index_files/header-attrs/header-attrs.js&#34;&gt;&lt;/script&gt;
+
+
+&lt;p&gt;在科研工作中，使用较多的应该就是两独立样本的显著性检验，也就是我们常说的比较两个组有没有统计学差异，比方说我们收集了身高数据，想比较男性和女性的身高有没有差别，这就是两独立样本的显著性检验，而最让人耳熟能详的就是t检验，然而有时候（我认为更多的适合）却又有一个非参数检验，其实统计学不那么严谨的话，基本都是用t检验，然而这样暴力的选择并不科学，那么到底该如何选择才是最科学的呢？&lt;/p&gt;
+&lt;p&gt;目前常用的统计软件有SPSS和GraphPad，不过这两个都是收费软件，虽然有破解版，然而总归是没有版权的，而R作为开源软件，又附带N多的包，功能什么强大，反正免费就是王道。。。&lt;/p&gt;
+&lt;p&gt;有两个参考网站可以供学习&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;&lt;a href=&#34;https://zhuanlan.zhihu.com/p/150479876&#34;&gt;R-两独立样本t检验&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;a href=&#34;https://zhuanlan.zhihu.com/p/150760480&#34;&gt;R-两独样本Wilcoxon检验&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div id=&#34;一假设检验的前提是什么&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;一、假设检验的前提是什么？&lt;/h3&gt;
+&lt;div id=&#34;两个样本是否独立&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;1. 两个样本是否独立？&lt;/h4&gt;
+&lt;p&gt;如果两个样本不是独立样本，而是配对样本，那么就不能用独立样本的t检验，而应该是配对样本的t检验。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;独立样本就是说两组样本没有什么关联，比如说男女的身高差，男的就跟女的没有任何关联&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;配对样本是其实是一种样本，不过经历了某种干预，比方说没有用药的时候是A组，然后给A组的成员用了药就变成了B组；又比方说同一个病人标本取了癌组织和癌旁组织，那么所有取了癌组织和癌旁组织标本的患者就是配对样本。&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div id=&#34;两组中每组的数据是否服从正态分布&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;2. 两组中每组的数据是否服从正态分布？&lt;/h4&gt;
+&lt;p&gt;在进行假设检验前，首先就要看是不是正态分布，也就是说要进行正态检验，一般有&lt;a href=&#34;https://link.zhihu.com/?target=http%3A//www.sthda.com/english/wiki/normality-test-in-r&#34;&gt;Shapiro-Wilk test&lt;/a&gt;（S-W检验）和Kolmogorov-Smirnov test（K-S检验），两种方法都有人用，但是一般选择S-W检验。这里我们一般不需要过分纠结选哪种，K-S检验适合用于大数据样本的正态性检验，我们主流还是选择&lt;strong&gt;S-W检验（shapiro.test()）&lt;/strong&gt;。&lt;/p&gt;
+&lt;ul class=&#34;task-list&#34;&gt;
+&lt;li&gt;&lt;p&gt;&lt;input type=&#34;checkbox&#34; disabled=&#34;&#34; checked=&#34;&#34; /&gt;
+只有符合正态分布的才可以使用t检验&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;input type=&#34;checkbox&#34; disabled=&#34;&#34; /&gt;
+如果数据不是正态分布的，可以尝试先进行数值转换，如log2处理，如果满足正态分布，可以选择t检验&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;input type=&#34;checkbox&#34; disabled=&#34;&#34; /&gt;
+如果数据不是正态分布，数值转换以后还是非正态，则建议使用非参数检验（即，两样本Wilcoxon秩检验）&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div id=&#34;这两个总体是否符合方差齐性&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;3. 这两个总体是否符合方差齐性？&lt;/h4&gt;
+&lt;p&gt;这点其实只在数据符合正态分布的使用，因为不正态分布的话，直接就非参数检验，但是一般非正态分布的情况下也可以做一下方差齐性检验。&lt;/p&gt;
+&lt;p&gt;方差齐性的检验方法也很多，一般也有三种检验方法：&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr class=&#34;header&#34;&gt;
+&lt;th&gt;方差齐性检验方法&lt;/th&gt;
+&lt;th&gt;总体样本要求&lt;/th&gt;
+&lt;th&gt;正态性要求&lt;/th&gt;
+&lt;th&gt;函数&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td&gt;F检验&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;两个&lt;/strong&gt;总体样本&lt;/td&gt;
+&lt;td&gt;要求有正态性&lt;/td&gt;
+&lt;td&gt;var.test&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td&gt;Bartlett &lt;span class=&#34;math inline&#34;&gt;\(\chi^2\)&lt;/span&gt;检验&lt;/td&gt;
+&lt;td&gt;多个总体样本&lt;/td&gt;
+&lt;td&gt;要求有正态性&lt;/td&gt;
+&lt;td&gt;bartlett.test()&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td&gt;Levene检验&lt;/td&gt;
+&lt;td&gt;多个总体样本&lt;/td&gt;
+&lt;td&gt;不要求正态性&lt;/td&gt;
+&lt;td&gt;leveneTest()，需加载car包&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;hr /&gt;
+&lt;p&gt;一般方差齐性检验完以后，会有两种情况&lt;/p&gt;
+&lt;ul class=&#34;task-list&#34;&gt;
+&lt;li&gt;&lt;p&gt;&lt;input type=&#34;checkbox&#34; disabled=&#34;&#34; /&gt;
+如果正态分布，两个总体符合方差齐性：选择近似t检验（有Satterthwaite法近似t检验、Welch法近似t检验和Cochran &amp;amp; Cox法近似t检验三种方法，一般为Welch法）&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;input type=&#34;checkbox&#34; disabled=&#34;&#34; /&gt;
+如果正态分布，但两个总体不符合方差齐性：正宗的&lt;strong&gt;t检验&lt;/strong&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;二一般操作步骤&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;二、一般操作步骤&lt;/h3&gt;
+&lt;div id=&#34;正态性检验&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;1、正态性检验&lt;/h4&gt;
+&lt;p&gt;比如先随机构建一个表格，看男女的体重差异&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;women_weight &amp;lt;- c(88.9, 81.2, 73.3, 21.8, 63.4, 84.6, 28.4, 28.8, 28.5)
+men_weight &amp;lt;- c(37.8, 80, 33.4, 36, 89.4, 83.3, 97.3, 81.3, 92.4)
+# 建立一个数据框
+my_data &amp;lt;- data.frame( 
+                group = rep(c(&amp;quot;Woman&amp;quot;, &amp;quot;Man&amp;quot;), each = 9),
+                weight = c(women_weight,  men_weight)
+                )
+print(my_data)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##    group weight
+## 1  Woman   88.9
+## 2  Woman   81.2
+## 3  Woman   73.3
+## 4  Woman   21.8
+## 5  Woman   63.4
+## 6  Woman   84.6
+## 7  Woman   28.4
+## 8  Woman   28.8
+## 9  Woman   28.5
+## 10   Man   37.8
+## 11   Man   80.0
+## 12   Man   33.4
+## 13   Man   36.0
+## 14   Man   89.4
+## 15   Man   83.3
+## 16   Man   97.3
+## 17   Man   81.3
+## 18   Man   92.4&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;在进行正态分布前，我们可以先统计一下数据，如按性别计算统计信息（中位数和四分位数范围（IQR）），这里使用dplyr软件包，用group_by函数，我们可以分别统计两种性别的数目、均数和标准差等信息。&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#install.packages(&amp;quot;dplyr&amp;quot;)
+library(dplyr)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+## 载入程辑包：&amp;#39;dplyr&amp;#39;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## The following objects are masked from &amp;#39;package:stats&amp;#39;:
+## 
+##     filter, lag&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## The following objects are masked from &amp;#39;package:base&amp;#39;:
+## 
+##     intersect, setdiff, setequal, union&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;group_by(my_data, group) %&amp;gt;% # 按group 分组
+  summarise(
+    count = n(), #定义数目
+    mean = mean(weight, na.rm = TRUE), #定义均数，去除空白值
+    sd = sd(weight, na.rm = TRUE), #定义标准差，去除空白
+  )&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## # A tibble: 2 × 4
+##   group count  mean    sd
+##   &amp;lt;chr&amp;gt; &amp;lt;int&amp;gt; &amp;lt;dbl&amp;gt; &amp;lt;dbl&amp;gt;
+## 1 Man       9  70.1  26.4
+## 2 Woman     9  55.4  28.1&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;可以简单看一下boxplot&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;boxplot(weight~group,my_data,col = c(&amp;quot;steelblue&amp;quot;, &amp;quot;brown&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://swcyo.netlify.app/post/torwilcoxon/index_files/figure-html/unnamed-chunk-3-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;然后就开始做正态性检验，这里选择Shapiro-Wilk test，即&lt;em&gt;shapiro.test()&lt;/em&gt;函数&lt;/p&gt;
+&lt;p&gt;这里要注意：不是简单用&lt;strong&gt;shapiro.test&lt;/strong&gt;(data$y)统计所有样品的正态分布，而应该是各个组的样品的正态分布，也就是要同时看男性和女性的正态分布，同时满足正态分布，才叫两独立样品的正态分布&lt;/p&gt;
+&lt;p&gt;使用&lt;strong&gt;with&lt;/strong&gt;()和&lt;strong&gt;shapiro.test&lt;/strong&gt;()的函数来为每组样本计算Shapiro-Wilk测试。&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;with(my_data, shapiro.test(weight[group == &amp;quot;Man&amp;quot;]))  # 检验男性的正态分布&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+##  Shapiro-Wilk normality test
+## 
+## data:  weight[group == &amp;quot;Man&amp;quot;]
+## W = 0.79399, p-value = 0.01743&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;with(my_data, shapiro.test(weight[group == &amp;quot;Woman&amp;quot;]))  # 检验女性的正态分布&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+##  Shapiro-Wilk normality test
+## 
+## data:  weight[group == &amp;quot;Woman&amp;quot;]
+## W = 0.83017, p-value = 0.04485&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;shapiro.test(my_data$weight) # 不考虑分组的话，要这样进行正态检验，这个适合于单个样品与均值的比较&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+##  Shapiro-Wilk normality test
+## 
+## data:  my_data$weight
+## W = 0.83988, p-value = 0.005889&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;可以看到两组样品的P值都是&amp;lt;0.05（男性p值为0.01743，女性p值为0.04485），也就是两组样品的正态分布具有显著性差异，也就是说都不符合正态分布，这个时候就可以直接选择非参数检验了，当然也可以同时检验一下是否还具有方差齐性。&lt;/p&gt;
+&lt;p&gt;这里还要注意，如果两组数据中&lt;strong&gt;只有一组不是正态分布&lt;/strong&gt;，&lt;strong&gt;也&lt;/strong&gt;要使用两独立样本的非参数Wilcoxon秩检验。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;方差齐性检验&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;2、方差齐性检验&lt;/h4&gt;
+&lt;p&gt;两独立样品推荐使用&lt;strong&gt;F检验&lt;/strong&gt;来检验方差齐性。可以使用&lt;strong&gt;var.test&lt;/strong&gt;(y,x,data)函数执行以下操作&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;var.test(weight ~ group, data = my_data)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+##  F test to compare two variances
+## 
+## data:  weight by group
+## F = 0.88062, num df = 8, denom df = 8, p-value = 0.8617
+## alternative hypothesis: true ratio of variances is not equal to 1
+## 95 percent confidence interval:
+##  0.1986398 3.9040261
+## sample estimates:
+## ratio of variances 
+##           0.880622&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;可以看到p值为0.8617，大于0.5，认为两组的方差具有差异，也就是说方差具有齐性，如果之前的数据呈正态分布，就可以使用t检验了，但是之前的数据不呈正态分布，所以还是选择非参数检验，所以如果数据不是正态分布的话，理论上就没有必要做方差齐性检验了。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;非参数检验&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;3、非参数检验&lt;/h4&gt;
+&lt;p&gt;我们知道这个数据不是正态分布，我们就选择非参数检验，但这里还要分两种情况：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;一种是双尾假设，也就是全部假设（比如我要知道的是男女之间的体重有没有差异）&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;一种是单尾假设，也就是说只看一种结果（比如我只想知道男的体重是不是比女的重）&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;那么这样就有三种结果：&lt;/p&gt;
+&lt;ol style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;&lt;p&gt;男女的体重之间有显着差异吗？&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;wilcox.test(weight ~ group, #数值比分组
+            data = my_data, #数据
+            var.equal = TRUE, #方差具有齐性
+            alternative = &amp;quot;two.sided&amp;quot; #双尾假设
+            )&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+##  Wilcoxon rank sum exact test
+## 
+## data:  weight by group
+## W = 59, p-value = 0.1135
+## alternative hypothesis: true location shift is not equal to 0&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;wilcox.test(weight ~ group, #数值比分组
+            data = my_data, #数据
+            var.equal = FALSE, #方差不具有齐性
+            alternative = &amp;quot;two.sided&amp;quot; #双尾假设
+            )&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+##  Wilcoxon rank sum exact test
+## 
+## data:  weight by group
+## W = 59, p-value = 0.1135
+## alternative hypothesis: true location shift is not equal to 0&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;这个数据的结果告诉我们，不管方差有没有齐性，其实两个的结果都是一样的，也佐证了非正态分布的样品，一般可以不做方差齐性检验，但是做了更严谨，因为毕竟还是有个var.equal函数，大家可以自行比较。&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;男性的体重是否小于女性的体重？&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;wilcox.test(weight ~ group, 
+            data = my_data,
+        var.equal = TRUE, 
+        alternative = &amp;quot;less&amp;quot; #不要问less是什么意思。。。
+        )&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+##  Wilcoxon rank sum exact test
+## 
+## data:  weight by group
+## W = 59, p-value = 0.953
+## alternative hypothesis: true location shift is less than 0&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;结果可以看出p&amp;gt;0.05，男的体重不比女性轻 3. 男性的体重是否大于女性的体重？&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;wilcox.test(weight ~ group, 
+            data = my_data,
+        var.equal = TRUE, 
+        alternative = &amp;quot;greater&amp;quot; #不要问greater是什么意思。。。
+        )&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+##  Wilcoxon rank sum exact test
+## 
+## data:  weight by group
+## W = 59, p-value = 0.05675
+## alternative hypothesis: true location shift is greater than 0&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;结果可以看出p&amp;gt;0.05，男的体重不比女的重&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;t检验&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;4、t检验&lt;/h4&gt;
+&lt;p&gt;这里我就不用别的数据来统计了，还是用这个数据，但是你要知道这样的结果是错的。。。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;如果数据呈正态分布，方差也具有齐性，我们就用t检验，依然有双尾和单尾假设，我们默认双尾，函数如下：&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;t.test(weight ~ group, 
+       data = my_data, 
+       var.equal = TRUE, # 方差具有齐性，要选择T，默认其实是F
+       alternative = &amp;quot;two.sided&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+##  Two Sample t-test
+## 
+## data:  weight by group
+## t = 1.1421, df = 16, p-value = 0.2702
+## alternative hypothesis: true difference in means between group Man and group Woman is not equal to 0
+## 95 percent confidence interval:
+##  -12.55755  41.89088
+## sample estimates:
+##   mean in group Man mean in group Woman 
+##            70.10000            55.43333&lt;/code&gt;&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;如果数据呈正态分布，但是方差不具有齐性，这时候我们选择近似t检验，需要把var.equal设置为F，其实默认就是F&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;t.test(weight ~ group, 
+       data = my_data, 
+       var.equal = F, # 方差具有齐性，要选择T，默认其实是F
+       alternative = &amp;quot;two.sided&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+##  Welch Two Sample t-test
+## 
+## data:  weight by group
+## t = 1.1421, df = 15.936, p-value = 0.2703
+## alternative hypothesis: true difference in means between group Man and group Woman is not equal to 0
+## 95 percent confidence interval:
+##  -12.56646  41.89980
+## sample estimates:
+##   mean in group Man mean in group Woman 
+##            70.10000            55.43333&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;如果想知道单尾假设结果，可以参考非参数检验，把alternative（可以简写为alt）设置为less或者greater即可&lt;/p&gt;
+&lt;hr /&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;三分析流程图&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;三、分析流程图&lt;/h3&gt;
+&lt;p&gt;&lt;img src=&#34;%E5%B1%8F%E5%B9%95%E5%BF%AB%E7%85%A7%202021-08-19%20%E4%B8%8B%E5%8D%889.16.54.png&#34; title=&#34;流程图&#34; /&gt;&lt;/p&gt;
+&lt;hr /&gt;
+&lt;p&gt;那么，一套组合拳就打完了，你对是选择哪种检验方法还清楚吗？&lt;/p&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>RStudio1.4发布，新增markdown可视化太强大了</title>
+      <link>https://swcyo.netlify.app/post/rstuido/</link>
+      <pubDate>Tue, 17 Aug 2021 00:00:00 +0000</pubDate>
+      <guid>https://swcyo.netlify.app/post/rstuido/</guid>
+      <description>
+&lt;script src=&#34;https://swcyo.netlify.app/post/rstuido/index_files/header-attrs/header-attrs.js&#34;&gt;&lt;/script&gt;
+
+
+&lt;p&gt;最近一直在学习用&lt;strong&gt;RStudio&lt;/strong&gt;建博客和写文章或书什么的，有了&lt;code&gt;Rmarkdown&lt;/code&gt;的支持，可以渲染很有有用的可视化效果，但是很多语句都是基于&lt;code&gt;markdown&lt;/code&gt;语言来写的，虽然markdown作为一款轻量级的语言，很适合用来写东西，而不是来排版，但是一直用代码，也是很烦人的，尤其我又是一个懒人，我要的是效果，而不是代码。&lt;/p&gt;
+&lt;p&gt;虽然有很多在线编辑器，也有&lt;code&gt;Typora&lt;/code&gt;这种可视化的软件支持，但都是拆东墙补西墙的办法，没有一款软件就能解决所有问题，比如我要搭博客，以前需要安装各种软件，需要各种代码，有了&lt;strong&gt;yihui&lt;/strong&gt;大神的支持，把很多东西都合成在RStudio里面，尤其嵌入了R markdown以后就可以很好的渲染R语言的效果，可以写word，可以写PPT，甚至还可以写期刊论文，节省了很多复制粘贴的工作，而且配合&lt;u&gt;bookdown&lt;/u&gt;以后还可以很好的写书，&lt;u&gt;pagedown&lt;/u&gt;可以很好的编辑网页，然后又开发了&lt;u&gt;blogdown&lt;/u&gt;，一步就可以配置hugo主题的博客，简直不要太方便。&lt;/p&gt;
+&lt;p&gt;我一直觉得用一款软件把大多数的工作完成是最好的，RStudio就可以很好的完成这些工作，可以用来统计，可以用来画图，可以用来写作，还可以用来搭博客，之前唯一的缺点可能就是对markdown原生态语句不能可视化了，毕竟我不是一个活在想象世界中的人，写代码的目的是为了最后的效果，我又不是码字🐶，能用简单的办法不好吗？&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;目前RStudio更新到1.4版，新增了很多实质性的硬核功能：&lt;/p&gt;
+&lt;p&gt;其中英文版介绍可见，&lt;a href=&#34;https://blog.rstudio.com/2021/06/09/rstudio-v1-4-update-whats-new/&#34; class=&#34;uri&#34;&gt;https://blog.rstudio.com/2021/06/09/rstudio-v1-4-update-whats-new/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;中文版在知乎上也有介绍，具体看这里&lt;a href=&#34;https://zhuanlan.zhihu.com/p/345804036&#34;&gt;&lt;strong&gt;RStudio v1.4 正式发布&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;其中最让有&lt;strong&gt;两个功能&lt;/strong&gt;最让我兴奋，又是解放双手的一天。。。。&lt;/p&gt;
+&lt;ul class=&#34;task-list&#34;&gt;
+&lt;li&gt;&lt;p&gt;&lt;input type=&#34;checkbox&#34; disabled=&#34;&#34; checked=&#34;&#34; /&gt;
+Rmarkdown编辑可视化&lt;a href=&#34;https://rstudio.github.io/visual-markdown-editing/&#34; class=&#34;uri&#34;&gt;https://rstudio.github.io/visual-markdown-editing/&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;input type=&#34;checkbox&#34; disabled=&#34;&#34; checked=&#34;&#34; /&gt;
+支持可视化插入参考文献&lt;a href=&#34;https://blog.rstudio.com/2020/11/09/rstudio-1-4-preview-citations/&#34; class=&#34;uri&#34;&gt;https://blog.rstudio.com/2020/11/09/rstudio-1-4-preview-citations/&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;新版的RStudio打开md文件后，可以在编辑界面里看到一个像&lt;strong&gt;A&lt;/strong&gt;一样的东西，不点它就这样&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;1.jpeg&#34; title=&#34;最原始&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;点一下最右边的那个A就这样&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;A.jpeg&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;而且插入图片可以直接点击上面的那个图片的符号，选好图片就出现效果了，可以自动添加标题和链接&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;2.1.jpeg&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;而且点一下图片，还可以直接编辑图片大小，真好 &lt;img src=&#34;1.1.jpeg&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;在Insert那里还有很多效果，最喜欢的是@Citation，这简直是写期刊和论文的利器，教程可以看这个&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://rstudio.github.io/visual-markdown-editing/citations.html&#34; class=&#34;uri&#34;&gt;https://rstudio.github.io/visual-markdown-editing/citations.html&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;2.jpeg&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;当然如果要支持显示参考文献的话，在新增的Rmd文件里需要在最前面的yml上添上这几句话（md是别的代码）&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;---
+title: &amp;quot;My Document&amp;quot;
+bibliography: references.bib
+link-citations: true
+---&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;参考文献支持Pubmed搜索关键词，连打开网站都省了，速度还挺快，比Endnote好，比如：&lt;/p&gt;
+&lt;p&gt;我的一篇文章&lt;span class=&#34;citation&#34;&gt;(&lt;a href=&#34;#ref-ou-yang2020&#34; role=&#34;doc-biblioref&#34;&gt;Ou-Yang, Liu, and Wang 2020&lt;/a&gt;)&lt;/span&gt;，&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;6.jpeg&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;还支持输入DOI直接搜索期刊，自动生成参考文献，比如&lt;/p&gt;
+&lt;p&gt;我的另一篇文章&lt;span class=&#34;citation&#34;&gt;(&lt;a href=&#34;#ref-Ouyang2020&#34; role=&#34;doc-biblioref&#34;&gt;Ouyang et al. 2020&lt;/a&gt;)&lt;/span&gt;：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;4.jpeg&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;当然还支持开源的&lt;strong&gt;Zotero&lt;/strong&gt;，可以直接加载本地的库插入参考文献，当然要安装Zotero，而且在百度学术上下载的文献格式还可以直接导入Zotero，期刊格式也是在线搜索&lt;/p&gt;
+&lt;p&gt;不过目前对中文的支持好像还不行，默认的都是？？？，需要手动改，可能我还不清楚，需要想别的办法&lt;/p&gt;
+&lt;p&gt;我的中文一 &lt;span class=&#34;citation&#34;&gt;&lt;a href=&#34;#ref-_mmp14_2021&#34; role=&#34;doc-biblioref&#34;&gt;欧阳松 et al.&lt;/a&gt; (&lt;a href=&#34;#ref-_mmp14_2021&#34; role=&#34;doc-biblioref&#34;&gt;2021&lt;/a&gt;)&lt;/span&gt;，我的中文二 &lt;span class=&#34;citation&#34;&gt;&lt;a href=&#34;#ref-_st3gal5_2020&#34; role=&#34;doc-biblioref&#34;&gt;欧阳松 et al.&lt;/a&gt; (&lt;a href=&#34;#ref-_st3gal5_2020&#34; role=&#34;doc-biblioref&#34;&gt;2020&lt;/a&gt;)&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;当然在线的也可以，而且浏览器还有插件，可以自动爬取网页生成参考文献。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;注：Zotero也是开源的软件，和R一样都是免费的东西，不用盗版，也不用破解，是所有文献管理软件的王者&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;可视化还是不错的，不然用了R，干嘛还要开发RStudio这款IDE呢。。。&lt;/p&gt;
+&lt;div id=&#34;参考文献&#34; class=&#34;section level3 unnumbered&#34;&gt;
+&lt;h3&gt;参考文献：&lt;/h3&gt;
+&lt;div id=&#34;refs&#34; class=&#34;references csl-bib-body hanging-indent&#34;&gt;
+&lt;div id=&#34;ref-Ouyang2020&#34; class=&#34;csl-entry&#34;&gt;
+Ouyang, Song, Ji?Hong Liu, Zhao Ni, Guo?Fu Ding, and Qin?Zhang Wang. 2020. &lt;span&gt;“Downregulation of St3gal5 Is Associated with Muscle Invasion, High Grade and a Poor Prognosis in Patients with Bladder Cancer.”&lt;/span&gt; &lt;em&gt;Oncology Letters&lt;/em&gt; 20 (1): 828–40. &lt;a href=&#34;https://doi.org/10.3892/ol.2020.11597&#34;&gt;https://doi.org/10.3892/ol.2020.11597&lt;/a&gt;.
+&lt;/div&gt;
+&lt;div id=&#34;ref-ou-yang2020&#34; class=&#34;csl-entry&#34;&gt;
+Ou-Yang, Song, Ji-Hong Liu, and Qin-Zhang Wang. 2020. &lt;span&gt;“Expression Patterns and a Prognostic Model of m6A-Associated Regulators in Prostate Adenocarcinoma.”&lt;/span&gt; &lt;em&gt;Biomarkers in Medicine&lt;/em&gt; 14 (18): 1717–31. &lt;a href=&#34;https://doi.org/10.2217/bmm-2020-0095&#34;&gt;https://doi.org/10.2217/bmm-2020-0095&lt;/a&gt;.
+&lt;/div&gt;
+&lt;div id=&#34;ref-_mmp14_2021&#34; class=&#34;csl-entry&#34;&gt;
+欧阳松, 倪钊, 李强, 王勤章, 丁国富, and 刘继红. 2021. &lt;span&gt;“高表达&lt;span&gt;MMP&lt;/span&gt;14与肾透明细胞癌预后及影响机制研究.”&lt;/span&gt; &lt;em&gt;农垦医学&lt;/em&gt; 42 (6): 4.
+&lt;/div&gt;
+&lt;div id=&#34;ref-_st3gal5_2020&#34; class=&#34;csl-entry&#34;&gt;
+欧阳松, 刘继红, 倪钊, 李强, 丁国富, and 王勤章. 2020. &lt;span&gt;“&lt;span&gt;ST&lt;/span&gt;3GAL5在膀胱尿路上皮癌中表达水平,预后分析及作用机制的研究.”&lt;/span&gt; &lt;em&gt;现代泌尿生殖肿瘤杂志&lt;/em&gt; 12 (4): 7.
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>使用R语言统计多蛋白多组的WB数据</title>
+      <link>https://swcyo.netlify.app/post/%E4%BD%BF%E7%94%A8r%E8%AF%AD%E8%A8%80%E7%BB%9F%E8%AE%A1%E5%A4%9A%E8%9B%8B%E7%99%BD%E5%A4%9A%E7%BB%84%E7%9A%84wb%E6%95%B0%E6%8D%AE/</link>
+      <pubDate>Wed, 11 Aug 2021 00:00:00 +0000</pubDate>
+      <guid>https://swcyo.netlify.app/post/%E4%BD%BF%E7%94%A8r%E8%AF%AD%E8%A8%80%E7%BB%9F%E8%AE%A1%E5%A4%9A%E8%9B%8B%E7%99%BD%E5%A4%9A%E7%BB%84%E7%9A%84wb%E6%95%B0%E6%8D%AE/</guid>
+      <description>
+
+
+&lt;div id=&#34;临床上经常使用wb验证蛋白表达水平使用imagej算出个泳道的灰度值以后需要做归一化和均一化处理步骤如下&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;临床上经常使用&lt;code&gt;WB&lt;/code&gt;验证蛋白表达水平,使用&lt;code&gt;ImageJ&lt;/code&gt;算出个泳道的灰度值以后,需要做归一化和均一化处理,步骤如下:&lt;/h4&gt;
+&lt;ol style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;首先计算目的蛋白/内参蛋白得到相对比,(有的人直接拿这个来统计,当然也可以,但是对照组就不是1)&lt;/li&gt;
+&lt;li&gt;拿各个相对比再除以各组的对照组组的相对比,这样对照组就都是1了&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;div id=&#34;这个功能可以很容易使用excel-or-wps实现当然也可以直接进行t检验但是发现如果所有值是1的话是无法在excel上使用t检验函数的当然最常见的是spss最常用的作图工具是graphpad-prism或origin不过定制性最高的却是r&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;这个功能可以很容易使用&lt;code&gt;Excel&lt;/code&gt; or &lt;code&gt;WPS&lt;/code&gt;实现,当然也可以直接进行T检验,但是发现如果所有值是1的话,是无法在&lt;code&gt;excel&lt;/code&gt;上使用t检验函数的,当然最常见的是SPSS,最常用的作图工具是Graphpad Prism或Origin,不过定制性最高的却是&lt;code&gt;R&lt;/code&gt;&lt;/h4&gt;
+&lt;/div&gt;
+&lt;div id=&#34;比如有这样一个wb表格数据&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;比如有这样一个WB表格数据&lt;/h4&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr class=&#34;header&#34;&gt;
+&lt;th&gt;sample&lt;/th&gt;
+&lt;th&gt;A&lt;/th&gt;
+&lt;th&gt;B&lt;/th&gt;
+&lt;th&gt;C&lt;/th&gt;
+&lt;th&gt;Actin&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td&gt;NC1&lt;/td&gt;
+&lt;td&gt;128061&lt;/td&gt;
+&lt;td&gt;362791&lt;/td&gt;
+&lt;td&gt;73876&lt;/td&gt;
+&lt;td&gt;595320&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td&gt;OE1&lt;/td&gt;
+&lt;td&gt;444296&lt;/td&gt;
+&lt;td&gt;685776&lt;/td&gt;
+&lt;td&gt;205065&lt;/td&gt;
+&lt;td&gt;595894&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td&gt;DR1&lt;/td&gt;
+&lt;td&gt;760531&lt;/td&gt;
+&lt;td&gt;1008761&lt;/td&gt;
+&lt;td&gt;336254&lt;/td&gt;
+&lt;td&gt;596468&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td&gt;NC2&lt;/td&gt;
+&lt;td&gt;206016&lt;/td&gt;
+&lt;td&gt;267960&lt;/td&gt;
+&lt;td&gt;126144&lt;/td&gt;
+&lt;td&gt;553840&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td&gt;OE2&lt;/td&gt;
+&lt;td&gt;454608&lt;/td&gt;
+&lt;td&gt;624546&lt;/td&gt;
+&lt;td&gt;251256&lt;/td&gt;
+&lt;td&gt;545392&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td&gt;DR2&lt;/td&gt;
+&lt;td&gt;703200&lt;/td&gt;
+&lt;td&gt;981132&lt;/td&gt;
+&lt;td&gt;376368&lt;/td&gt;
+&lt;td&gt;536944&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td&gt;NC3&lt;/td&gt;
+&lt;td&gt;215730&lt;/td&gt;
+&lt;td&gt;236808&lt;/td&gt;
+&lt;td&gt;118008&lt;/td&gt;
+&lt;td&gt;560008&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td&gt;OE3&lt;/td&gt;
+&lt;td&gt;441000&lt;/td&gt;
+&lt;td&gt;639600&lt;/td&gt;
+&lt;td&gt;255750&lt;/td&gt;
+&lt;td&gt;560505&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td&gt;DR3&lt;/td&gt;
+&lt;td&gt;666270&lt;/td&gt;
+&lt;td&gt;1042392&lt;/td&gt;
+&lt;td&gt;393492&lt;/td&gt;
+&lt;td&gt;561002&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div id=&#34;从excel里面复制以后可以从excel直接粘贴数据-mac系统代码&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;从excel里面复制以后,可以从excel直接粘贴数据 (Mac系统代码)&lt;/h4&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;wb &amp;lt;- read.table(pipe(&amp;quot;pbpaste&amp;quot;), # 读取剪切板中的数据
+                      sep=&amp;quot;\t&amp;quot;, # 指定分隔符
+                      header = TRUE) &lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;如果是windows系统,那么代码就是:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;### wb &amp;lt;- read.table(file = &amp;quot;clipboard&amp;quot;, sep = &amp;quot;\t&amp;quot;, header=TRUE) # &lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;接着我们开始进行计算&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;接着我们开始进行计算&lt;/h4&gt;
+&lt;/div&gt;
+&lt;div id=&#34;首先是用目的蛋白内参蛋白actin我定义为x_r&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;1. 首先是用目的蛋白/内参蛋白(actin),我定义为&lt;code&gt;x_r&lt;/code&gt;&lt;/h4&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;wb$A_r&amp;lt;-wb$A/wb$Actin
+wb$B_r&amp;lt;-wb$B/wb$Actin
+wb$C_r&amp;lt;-wb$C/wb$Actin&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;用x_r除以nc组的相对比我将他定义为x_n.由于没有excel的e2这种实现固定的办法因此我想办法曲折了一下我的思路是先新增一列a_n然后前3行除以a_r的第一行中间三行除以a_r的第四行后三行除以a_r的第七行然后居然成功了后面同法计算b和c蛋白的归一化值.&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;2. 用x_r除以NC组的相对比,我将他定义为’x_n’.由于没有&lt;code&gt;excel&lt;/code&gt;的&lt;code&gt;$E$2&lt;/code&gt;这种实现固定的办法,因此我想办法曲折了一下,我的思路是先新增一列&lt;code&gt;A_n&lt;/code&gt;,然后前3行除以A_r的第一行,中间三行除以A_r的第四行,后三行除以A_r的第七行,然后居然成功了,后面同法计算B和C蛋白的归一化值.&lt;/h4&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;wb$A_n[1:3]=wb$A_r[1:3]/wb$A_r[1]
+wb$A_n[4:6]=wb$A_r[4:6]/wb$A_r[4]
+wb$A_n[7:9]=wb$A_r[7:9]/wb$A_r[7]
+wb$B_n[1:3]=wb$B_r[1:3]/wb$B_r[1]
+wb$B_n[4:6]=wb$B_r[4:6]/wb$B_r[4]
+wb$B_n[7:9]=wb$B_r[7:9]/wb$B_r[7]
+wb$C_n[1:3]=wb$C_r[1:3]/wb$C_r[1]
+wb$C_n[4:6]=wb$C_r[4:6]/wb$C_r[4]
+wb$C_n[7:9]=wb$C_r[7:9]/wb$C_r[7]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;首先需要把短数据转换为长数据把样本留下添加一列蛋白和一列灰度值分别命名为protein和value.&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;首先需要把短数据转换为长数据,把样本留下,添加一列蛋白和一列灰度值,分别命名为’protein’和’value’.&lt;/h4&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(reshape2) 
+wb_long&amp;lt;-melt(wb,
+                id.vars = c(&amp;#39;sample&amp;#39;),##需要保留的列,非数字格式
+                measure.vars=c(&amp;#39;A_n&amp;#39;,&amp;#39;B_n&amp;#39;,&amp;#39;C_n&amp;#39;),##需要保留的值,数字格式
+                variable.name=&amp;#39;Protein&amp;#39;,##新定义个列并命名,非数字格式
+                value.name=&amp;#39;Value&amp;#39;)##新定义一个列并命名,数字格式&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;新增一个分组如果是单纯按ncoe和dr排序的话完全可以&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;新增一个分组,如果是单纯按NC、OE、和DR排序的话,完全可以&lt;/h4&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;wb_long$Group=rep(c(&amp;#39;NC&amp;#39;, &amp;#39;OE&amp;#39;,&amp;#39;DR&amp;#39;), each = 3)  ##分为3组，每组3个数据&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;但是这个数据是按nc1oe1dr1nc2这样排序所以上面代码分组后是错的最简单的办法是导出csv然后excel简单定义一下其实也就是把数字去掉加个group的组就行但是这部操作r我还没学会有个shiny的包可以交互式处理数据但是又不能直接保存到environment里其实这种简单的处理完全可以先excel处理好了以后再作图毕竟excel号称除了不能生孩子&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;但是这个数据是按NC1,OE1,DR1,NC2…这样排序,所以上面代码分组后是错的,最简单的办法是导出csv,然后Excel简单定义一下,其实也就是把数字去掉,加个Group的组就行,但是这部操作R我还没学会,有个shiny的包可以交互式处理数据,但是又不能直接保存到Environment里,其实这种简单的处理,完全可以先excel处理好了以后再作图,毕竟&lt;code&gt;excel&lt;/code&gt;号称除了不能生孩子…&lt;/h4&gt;
+&lt;/div&gt;
+&lt;div id=&#34;当然如果你想用shiny可以按照dataeditr这个包直接安装即可但前提是要先安装好shiny&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;当然如果你想用&lt;code&gt;shiny&lt;/code&gt;,可以按照&lt;code&gt;DataEditR&lt;/code&gt;这个包,直接安装即可,但前提是要先安装好shiny&lt;/h4&gt;
+&lt;blockquote&gt;
+&lt;p&gt;instal.packages(“shiny”)
+instal.packages(“DataEditR”)
+library(DataEditR)
+data_edit(wb_long)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;这样就可以像excel那样处理表格里,导出数据,再导入数据.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;wb_long&amp;lt;-read.csv(&amp;quot;/Users/mac/Documents/GitHub/blog/content/post/2021-08-11-使用r语言统计多蛋白多组的wb/wb_long.csv&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;固定一下分组的顺序需要先设置为因子&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;固定一下分组的顺序,需要先设置为因子&lt;/h2&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;wb_long &amp;lt;- within(wb_long, Group &amp;lt;- factor(Group, levels = c(&amp;quot;NC&amp;quot;, &amp;quot;OE&amp;quot;,&amp;quot;DR&amp;quot;))) &lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;画图这里联合ggplot2和ggpubr其实ggpubr可以一步出图但是底层限制死了我们可以借助ggppubr进行统计画图还是用ggplot2统计的是两种首先进行anova看整体差异然后看各组与对照组的差异&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;画图,这里联合ggplot2和ggpubr,其实ggpubr可以一步出图,但是底层限制死了,我们可以借助ggppubr进行统计,画图还是用ggplot2,统计的是两种,首先进行anova看整体差异,然后看各组与对照组的差异&lt;/h2&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(ggplot2)
+library(ggpubr)
+ggplot(wb_long ,
+       aes(x=Group,y=Value,color=Group,fill=Group))+
+    geom_bar(stat=&amp;quot;summary&amp;quot;,fun=mean,position=&amp;quot;dodge&amp;quot;)+
+    stat_summary(fun.data = &amp;#39;mean_sd&amp;#39;, geom = &amp;quot;errorbar&amp;quot;, width = 0.5,position = position_dodge(0.9))+
+    facet_grid(~Protein,scales = &amp;#39;free&amp;#39;)+
+    theme_minimal(base_size = 12)+
+    labs(x=NULL,y=&amp;#39;Relative protein expression&amp;#39;)+
+    geom_dotplot(stackdir = &amp;quot;center&amp;quot;, binaxis = &amp;quot;y&amp;quot;, 
+                 fill = &amp;quot;lightgray&amp;quot;, 
+                 dotsize = 0.9,position = position_dodge(0.9))+
+    stat_compare_means(method = &amp;quot;anova&amp;quot;)+
+    stat_compare_means(method = &amp;#39;t.test&amp;#39;,label = &amp;quot;p.signif&amp;quot;,comparisons = list(c(&amp;#39;NC&amp;#39;,&amp;#39;OE&amp;#39;),c(&amp;#39;NC&amp;#39;,&amp;#39;DR&amp;#39;)))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Bin width defaults to 1/30 of the range of the data. Pick better value with `binwidth`.&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://swcyo.netlify.app/post/%E4%BD%BF%E7%94%A8r%E8%AF%AD%E8%A8%80%E7%BB%9F%E8%AE%A1%E5%A4%9A%E8%9B%8B%E7%99%BD%E5%A4%9A%E7%BB%84%E7%9A%84wb%E6%95%B0%E6%8D%AE/index.cn_files/figure-html/unnamed-chunk-9-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;div id=&#34;也可以提取某一个蛋白的数据进行毕竟比如只看b蛋白的数据可以用下面的函数然后作图&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;也可以提取某一个蛋白的数据,进行毕竟,比如只看&lt;code&gt;B蛋白&lt;/code&gt;的数据,可以用下面的函数,然后作图&lt;/h4&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;B&amp;lt;-wb_long[wb_long$Protein == &amp;#39;B_n&amp;#39;,]
+ggplot(B ,
+       aes(x=Group,y=Value,color=Group,fill=Group))+
+    geom_bar(stat=&amp;quot;summary&amp;quot;,fun=mean,position=&amp;quot;dodge&amp;quot;)+
+    stat_summary(fun.data = &amp;#39;mean_sd&amp;#39;, geom = &amp;quot;errorbar&amp;quot;, width = 0.5,position = position_dodge(0.9))+
+    theme_minimal(base_size = 12)+
+    labs(x=NULL,y=&amp;#39;Relative protein expression&amp;#39;)+
+    geom_dotplot(stackdir = &amp;quot;center&amp;quot;, binaxis = &amp;quot;y&amp;quot;, 
+                 fill = &amp;quot;lightgray&amp;quot;, 
+                 dotsize = 0.9,position = position_dodge(0.9))+
+    stat_compare_means(method = &amp;quot;anova&amp;quot;)+
+    stat_compare_means(method = &amp;#39;t.test&amp;#39;,label = &amp;quot;p.signif&amp;quot;,comparisons = list(c(&amp;#39;NC&amp;#39;,&amp;#39;OE&amp;#39;),c(&amp;#39;NC&amp;#39;,&amp;#39;DR&amp;#39;)))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Bin width defaults to 1/30 of the range of the data. Pick better value with `binwidth`.&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://swcyo.netlify.app/post/%E4%BD%BF%E7%94%A8r%E8%AF%AD%E8%A8%80%E7%BB%9F%E8%AE%A1%E5%A4%9A%E8%9B%8B%E7%99%BD%E5%A4%9A%E7%BB%84%E7%9A%84wb%E6%95%B0%E6%8D%AE/index.cn_files/figure-html/unnamed-chunk-10-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;当然也可以换个主题和配色可以用ggsci也可以用ggplot的自定义这里用ggsci的lancet配色&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;当然也可以换个主题和配色,可以用&lt;code&gt;ggsci&lt;/code&gt;,也可以用ggplot的自定义,这里用&lt;code&gt;ggsci&lt;/code&gt;的&lt;code&gt;lancet&lt;/code&gt;配色&lt;/h2&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(ggsci)
+ggplot(B ,
+       aes(x=Group,y=Value,color=Group,fill=Group))+
+    geom_bar(stat=&amp;quot;summary&amp;quot;,fun=mean,position=&amp;quot;dodge&amp;quot;)+
+    stat_summary(fun.data = &amp;#39;mean_sd&amp;#39;, geom = &amp;quot;errorbar&amp;quot;, width = 0.5,position = position_dodge(0.9))+
+    theme_bw(base_size = 12)+
+    scale_color_lancet()+
+    scale_fill_lancet()+
+    labs(x=NULL,y=&amp;#39;Relative protein expression&amp;#39;)+
+    geom_dotplot(stackdir = &amp;quot;center&amp;quot;, binaxis = &amp;quot;y&amp;quot;, 
+                 fill = &amp;quot;lightgray&amp;quot;, 
+                 dotsize = 0.9,position = position_dodge(0.9))+
+    stat_compare_means(method = &amp;quot;anova&amp;quot;)+
+    stat_compare_means(method = &amp;#39;t.test&amp;#39;,label = &amp;quot;p.signif&amp;quot;,comparisons = list(c(&amp;#39;NC&amp;#39;,&amp;#39;OE&amp;#39;),c(&amp;#39;NC&amp;#39;,&amp;#39;DR&amp;#39;)))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Bin width defaults to 1/30 of the range of the data. Pick better value with `binwidth`.&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://swcyo.netlify.app/post/%E4%BD%BF%E7%94%A8r%E8%AF%AD%E8%A8%80%E7%BB%9F%E8%AE%A1%E5%A4%9A%E8%9B%8B%E7%99%BD%E5%A4%9A%E7%BB%84%E7%9A%84wb%E6%95%B0%E6%8D%AE/index.cn_files/figure-html/unnamed-chunk-11-1.png&#34; width=&#34;672&#34; /&gt;
+## 这里手动添加配色,然后把标签去掉,因为底下已经有标签了,加一句&lt;code&gt;theme(legend.position = &#39;none&#39;)&lt;/code&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;ggplot(B ,
+       aes(x=Group,y=Value,color=Group,fill=Group))+
+    geom_bar(stat=&amp;quot;summary&amp;quot;,fun=mean,position=&amp;quot;dodge&amp;quot;)+
+    stat_summary(fun.data = &amp;#39;mean_sd&amp;#39;, geom = &amp;quot;errorbar&amp;quot;, width = 0.5,position = position_dodge(0.9))+
+    theme_bw(base_size = 12)+
+    scale_color_manual(values = c(&amp;#39;gray&amp;#39;,&amp;#39;steelblue&amp;#39;,&amp;#39;firebrick&amp;#39;))+
+    scale_fill_manual(values = c(&amp;#39;gray&amp;#39;,&amp;#39;steelblue&amp;#39;,&amp;#39;firebrick&amp;#39;))+
+    labs(x=NULL,y=&amp;#39;Relative protein expression&amp;#39;)+
+    geom_dotplot(stackdir = &amp;quot;center&amp;quot;, binaxis = &amp;quot;y&amp;quot;, 
+                 fill = &amp;quot;lightgray&amp;quot;, 
+                 dotsize = 0.9,position = position_dodge(0.9))+
+    stat_compare_means(method = &amp;quot;anova&amp;quot;)+
+    stat_compare_means(method = &amp;#39;t.test&amp;#39;,label = &amp;quot;p.signif&amp;quot;,comparisons = list(c(&amp;#39;NC&amp;#39;,&amp;#39;OE&amp;#39;),c(&amp;#39;NC&amp;#39;,&amp;#39;DR&amp;#39;)))+theme(legend.position = &amp;#39;none&amp;#39;)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Bin width defaults to 1/30 of the range of the data. Pick better value with `binwidth`.&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://swcyo.netlify.app/post/%E4%BD%BF%E7%94%A8r%E8%AF%AD%E8%A8%80%E7%BB%9F%E8%AE%A1%E5%A4%9A%E8%9B%8B%E7%99%BD%E5%A4%9A%E7%BB%84%E7%9A%84wb%E6%95%B0%E6%8D%AE/index.cn_files/figure-html/unnamed-chunk-12-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

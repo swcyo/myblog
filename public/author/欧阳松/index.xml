@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>欧阳松 | Swcyo</title>
+    <link>https://swcyo.netlify.app/author/%E6%AC%A7%E9%98%B3%E6%9D%BE/</link>
+      <atom:link href="https://swcyo.netlify.app/author/%E6%AC%A7%E9%98%B3%E6%9D%BE/index.xml" rel="self" type="application/rss+xml" />
+    <description>欧阳松</description>
+    <generator>Wowchemy (https://wowchemy.com)</generator><language>en-us</language><copyright>© {2021} Song Ou-Yang</copyright>
+    <image>
+      <url>https://swcyo.netlify.app/author/%E6%AC%A7%E9%98%B3%E6%9D%BE/avatar_hu32f889f3337c9db9518846833613667f_51454_270x270_fill_q75_lanczos_center.jpg</url>
+      <title>欧阳松</title>
+      <link>https://swcyo.netlify.app/author/%E6%AC%A7%E9%98%B3%E6%9D%BE/</link>
+    </image>
+    
+  </channel>
+</rss>

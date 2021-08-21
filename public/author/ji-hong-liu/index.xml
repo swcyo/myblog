@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Ji-Hong Liu | Swcyo</title>
+    <link>https://swcyo.netlify.app/author/ji-hong-liu/</link>
+      <atom:link href="https://swcyo.netlify.app/author/ji-hong-liu/index.xml" rel="self" type="application/rss+xml" />
+    <description>Ji-Hong Liu</description>
+    <generator>Wowchemy (https://wowchemy.com)</generator><language>en-us</language><copyright>© {2021} Song Ou-Yang</copyright><lastBuildDate>Mon, 14 Dec 2020 00:00:00 +0000</lastBuildDate>
+    <image>
+      <url>https://swcyo.netlify.app/media/icon_hua2ec155b4296a9c9791d015323e16eb5_11927_512x512_fill_lanczos_center_3.png</url>
+      <title>Ji-Hong Liu</title>
+      <link>https://swcyo.netlify.app/author/ji-hong-liu/</link>
+    </image>
+    
+    <item>
+      <title>Expression patterns and a prognostic model of m6A-associated regulators in prostate adenocarcinoma</title>
+      <link>https://swcyo.netlify.app/publication/bmm-2020-0095/</link>
+      <pubDate>Mon, 14 Dec 2020 00:00:00 +0000</pubDate>
+      <guid>https://swcyo.netlify.app/publication/bmm-2020-0095/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

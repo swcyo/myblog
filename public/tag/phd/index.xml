@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>phD | Swcyo</title>
+    <link>https://swcyo.netlify.app/tag/phd/</link>
+      <atom:link href="https://swcyo.netlify.app/tag/phd/index.xml" rel="self" type="application/rss+xml" />
+    <description>phD</description>
+    <generator>Wowchemy (https://wowchemy.com)</generator><language>en-us</language><copyright>© {2021} Song Ou-Yang</copyright><lastBuildDate>Sun, 16 Aug 2020 00:00:00 +0000</lastBuildDate>
+    <image>
+      <url>https://swcyo.netlify.app/media/icon_hua2ec155b4296a9c9791d015323e16eb5_11927_512x512_fill_lanczos_center_3.png</url>
+      <title>phD</title>
+      <link>https://swcyo.netlify.app/tag/phd/</link>
+    </image>
+    
+    <item>
+      <title>两独立样本进行统计,作箱式图和ROC曲线</title>
+      <link>https://swcyo.netlify.app/post/roc/</link>
+      <pubDate>Sun, 16 Aug 2020 00:00:00 +0000</pubDate>
+      <guid>https://swcyo.netlify.app/post/roc/</guid>
+      <description>
+
+
+&lt;ul&gt;
+&lt;li&gt;比较肿瘤与正常组织的差异,需要进行两独立样本的T检验,可以用boxplot展示,还可以用RCO曲线评估预测性能,那么可以用ggplot2和pROC进行图片构建.&lt;/li&gt;
+&lt;li&gt;首先导入数据,需要类型和数值两列,如下所示:&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt; library(readr)
+ data&amp;lt;- read.csv(&amp;quot;content/post/2020-08-16-roc/data.csv&amp;quot;)
+ knitr::kable(data)&lt;/code&gt;&lt;/pre&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr class=&#34;header&#34;&gt;
+&lt;th&gt;Type&lt;/th&gt;
+&lt;th&gt;value&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td&gt;Cancer&lt;/td&gt;
+&lt;td&gt;10.005625&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td&gt;Cancer&lt;/td&gt;
+&lt;td&gt;7.851749&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td&gt;Cancer&lt;/td&gt;
+&lt;td&gt;10.030667&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td&gt;Cancer&lt;/td&gt;
+&lt;td&gt;10.79604&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td&gt;Cancer&lt;/td&gt;
+&lt;td&gt;9.805744&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td&gt;Normal&lt;/td&gt;
+&lt;td&gt;10.210671&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td&gt;Normal&lt;/td&gt;
+&lt;td&gt;9.319673&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td&gt;Normal&lt;/td&gt;
+&lt;td&gt;8.9128895&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td&gt;Normal&lt;/td&gt;
+&lt;td&gt;9.3442955&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td&gt;Normal&lt;/td&gt;
+&lt;td&gt;11.58684&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td&gt;Normal&lt;/td&gt;
+&lt;td&gt;8.672425&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td&gt;Normal&lt;/td&gt;
+&lt;td&gt;10.518653&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td&gt;Normal&lt;/td&gt;
+&lt;td&gt;9.902375&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;首先是boxplot,可以用&lt;code&gt;ggplot2&lt;/code&gt;作图,&lt;code&gt;ggsignif&lt;/code&gt;进行统计,然后&lt;code&gt;ggsci&lt;/code&gt;配色,由于默认的X轴排序是按英文来的,如果想固定一个顺序排序,可以把X轴的变量设置为因子,然后定义先后顺序&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt; data&amp;lt;- within(data, Type &amp;lt;- factor(Type, levels = c(&amp;quot;Normal&amp;quot;, &amp;quot;Cancer&amp;quot;))) 
+ shapiro.test(data$value)  # 首先进行正态检验
+#   Shapiro-Wilk normality test
+#
+#data:  data$value
+#W = 0.98318, p-value = 0.005502&lt;/code&gt;&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;可知p&amp;lt;0.05,不符合正态分布,选择非参数检验,默认的就是&lt;code&gt;非参数检验&lt;/code&gt;,如果大于0.5就改用&lt;code&gt;t.test&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt; library(ggplot2)
+ library(ggsignif)
+ library(ggsci)
+ p1&amp;lt;-ggplot(data,aes(x=Type,y=value,color=Type,shape=Type))+ #X轴为类型,Y轴为数值,按类型填色,按类型分形状
+   geom_boxplot()+geom_jitter()+#加柱状图,加点
+   theme_bw(base_size = 12)+#背景和字体大学
+   theme(legend.position = &amp;#39;none&amp;#39;)+#去掉标签
+   ggtitle(&amp;quot;Dataset&amp;quot;)+xlab(NULL)+#添加标题,去掉X轴
+   ylab(&amp;quot;Expression value\nelog2(TPM+1)&amp;quot;)+ #\n表示下一行
+   scale_color_lancet()+#lancet配色
+   geom_signif(comparisons = list(c(&amp;quot;Normal&amp;quot;,&amp;quot;Cancer&amp;quot;)),map_signif_level = T,textsize = 4)#显著标识
+ p1&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;images/000003.png&#34; /&gt;
+接下来是ROC曲线的构建,需要用到&lt;code&gt;pROC&lt;/code&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# library(pROC)
+ roc&amp;lt;-roc(data$Type,data$value,ci=TRUE,  smooth = TRUE) #进行roc计算,然后做曲线处理
+ roc$ci # 只有2.5,50和97.5%的置信区间,不是95%
+# 95% CI: 0.506-0.672 (2000 stratified bootstrap replicates)
+ roc$auc #曲线下面积,一般大于0.5最好
+# Area under the curve: 0.5878&lt;/code&gt;&lt;/pre&gt;
+&lt;div id=&#34;画图&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;画图&lt;/h1&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt; p2&amp;lt;-ggroc(roc,color=&amp;quot;#00468B&amp;quot;)+ggtitle(&amp;quot;ROC curver&amp;quot;)+
+   theme_bw(base_size = 12)+     
+   geom_segment(aes(x = 1, xend = 0, y = 0, yend = 1), color=&amp;quot;grey&amp;quot;,linetype=&amp;quot;dashed&amp;quot;)+
+   ggplot2::annotate(&amp;#39;text&amp;#39;,x=0.12,y=0.25,label=paste(&amp;quot;AUC:&amp;quot;,round(roc$auc,4)))+ # 提取ACU结果,四位小数点
+  ggplot2::annotate(&amp;#39;text&amp;#39;,x=0.18,y=0.15,label=paste(&amp;quot;97.5%CI:&amp;quot;,round(roc$ci[1],4),&amp;quot;-&amp;quot;,round(roc$ci[3],4)))# 提取97.5%结果,四位小数点
+ p2&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;images/000004.png&#34; /&gt;
+&lt;h1&gt;最后,将两张图拼起来&lt;/h1&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt; cowplot::plot_grid(p1,p2,labels = &amp;quot;AUTO&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;images/000005.png&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

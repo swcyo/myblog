@@ -1,0 +1,1365 @@
+<!DOCTYPE html><html lang="en-us" >
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  
+  
+  
+    <meta name="generator" content="Wowchemy 5.3.0 for Hugo" />
+  
+
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+  
+  
+
+  <meta name="author" content="欧阳松" />
+
+  
+  
+  
+    
+  
+  <meta name="description" content="泛癌的基因表达量一般可以用TCGA和GTEx实现，而肿瘤细胞系一般用CCLE数据库. 临床生信之家是一个很好的在线工具，目前上架了CCLE的功能，出的图见下，可以实现单基因在泛癌和单病种的可视化，但是这个网址什么都好，就是有次数限制，后面使用要加钱，而且价钱不菲，学生党望而却步。。。
+会R语言，当然可以省掉这笔巨款，而且可以DIY，乐趣无穷 首先去CCLE官网下载数据，目前网页更新了，功能也多了 比如TP53，访问这个网址TP53 DepMap Gene Summary就行，在Characterization里Expression 21Q2 Public右边有个下载标志，基因单位是Log2(TPM&#43;1)，很科学
+CCLE2021年的更新了很多,比以前好看多了,也科学多了啊…
+下载后的数据默认命名是： [TP53 Expression 21Q2 Public.csv`] (https://depmap.org/portal/partials/entity_summary/download?entity_id=38037&amp;dep_enum_name=expression&amp;size_biom_enum_name=none&amp;color=none)
+不过这里最大的问题就是国内访问的速度真的是很随机啊,想快有时候根本快不了,如果电脑一直打不开,就用手机打开再传到电脑上吧,当然你也可以去hiplot.com.cn上去下载数据,虽然不是最新的,然而至少网速很快,但是需要二次处理一下数据
+首先把数据读进R里面
+library(readr) TP53_Expression_21Q2_Public &lt;- read_csv(&quot;~/Desktop/TP53 Expression 21Q2 Public.csv&quot;) ## Rows: 1378 Columns: 6 ## ─ Column specification ──────────────────────────── ## Delimiter: &quot;,&quot; ## chr (5): Depmap ID, Cell Line Name, Primary Disease, Lineage, Lineage Subtype ## dbl (1): Expression 21Q2 Public ## ## ℹ Use `spec()` to retrieve the full column specification for this data." />
+
+  
+  <link rel="alternate" hreflang="en-us" href="https://swcyo.netlify.app/post/ccle/" />
+
+  
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  
+
+  
+  
+  
+    <meta name="theme-color" content="#1565c0" />
+  
+
+  
+  
+
+  
+  
+  
+  
+    
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha256-FMvZuGapsJLjouA6k7Eo2lusoAX9i0ShlWFG6qt7SLc=" crossorigin="anonymous" media="print" onload="this.media='all'">
+
+    
+    
+    
+    
+      
+      
+    
+    
+    
+
+    
+    
+    
+      
+    
+    
+      
+      
+        
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.2.0/styles/github.min.css" crossorigin="anonymous" title="hl-light" media="print" onload="this.media='all'">
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.2.0/styles/dracula.min.css" crossorigin="anonymous" title="hl-dark" media="print" onload="this.media='all'" disabled>
+        
+      
+    
+
+    
+    
+    
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.min.css" integrity="sha512-1xoFisiGdy9nvho8EgXuXvnpR5GAMSjFwp40gSRE3NwdUdIMIKuPa7bqoUhLD0O/5tPNhteAsE5XyyMi5reQVA==" crossorigin="anonymous" media="print" onload="this.media='all'">
+    
+
+    
+
+    
+    
+      
+      
+
+      
+      
+
+      
+    
+      
+      
+
+      
+      
+
+      
+    
+      
+      
+
+      
+      
+
+      
+    
+      
+      
+
+      
+      
+
+      
+    
+      
+      
+
+      
+      
+
+      
+    
+      
+      
+
+      
+      
+
+      
+    
+      
+      
+
+      
+      
+
+      
+    
+      
+      
+
+      
+      
+
+      
+    
+      
+      
+
+      
+      
+
+      
+    
+      
+      
+
+      
+      
+
+      
+    
+      
+      
+
+      
+      
+
+      
+    
+      
+      
+
+      
+      
+
+      
+    
+      
+      
+
+      
+      
+
+      
+    
+      
+      
+
+      
+      
+
+      
+    
+      
+      
+
+      
+      
+        
+      
+
+      
+    
+      
+      
+
+      
+      
+
+      
+    
+      
+      
+
+      
+      
+
+      
+    
+  
+
+  
+  
+  
+    
+      
+      <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Roboto+Mono&family=Roboto:wght@400;700&display=swap">
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Roboto+Mono&family=Roboto:wght@400;700&display=swap" media="print" onload="this.media='all'">
+    
+  
+
+  
+  
+  
+  
+  
+  <link rel="stylesheet" href="/css/wowchemy.f0cf03b20998d63e314819fa4a90c13f.css" />
+
+  
+
+
+
+  
+
+  
+
+  
+
+
+
+
+  
+  
+  
+
+  
+
+  
+    <link rel="manifest" href="/manifest.webmanifest" />
+  
+
+  <link rel="icon" type="image/png" href="/media/icon_hua2ec155b4296a9c9791d015323e16eb5_11927_32x32_fill_lanczos_center_3.png" />
+  <link rel="apple-touch-icon" type="image/png" href="/media/icon_hua2ec155b4296a9c9791d015323e16eb5_11927_180x180_fill_lanczos_center_3.png" />
+
+  <link rel="canonical" href="https://swcyo.netlify.app/post/ccle/" />
+
+  
+  
+  
+  
+  
+  
+  
+  
+    
+    
+  
+  
+  <meta property="twitter:card" content="summary" />
+  
+    <meta property="twitter:site" content="@swcyo" />
+    <meta property="twitter:creator" content="@swcyo" />
+  
+  <meta property="og:site_name" content="Swcyo" />
+  <meta property="og:url" content="https://swcyo.netlify.app/post/ccle/" />
+  <meta property="og:title" content="单基因的肿瘤细胞系表达怎么看？CCLE告诉你 | Swcyo" />
+  <meta property="og:description" content="泛癌的基因表达量一般可以用TCGA和GTEx实现，而肿瘤细胞系一般用CCLE数据库. 临床生信之家是一个很好的在线工具，目前上架了CCLE的功能，出的图见下，可以实现单基因在泛癌和单病种的可视化，但是这个网址什么都好，就是有次数限制，后面使用要加钱，而且价钱不菲，学生党望而却步。。。
+会R语言，当然可以省掉这笔巨款，而且可以DIY，乐趣无穷 首先去CCLE官网下载数据，目前网页更新了，功能也多了 比如TP53，访问这个网址TP53 DepMap Gene Summary就行，在Characterization里Expression 21Q2 Public右边有个下载标志，基因单位是Log2(TPM&#43;1)，很科学
+CCLE2021年的更新了很多,比以前好看多了,也科学多了啊…
+下载后的数据默认命名是： [TP53 Expression 21Q2 Public.csv`] (https://depmap.org/portal/partials/entity_summary/download?entity_id=38037&amp;dep_enum_name=expression&amp;size_biom_enum_name=none&amp;color=none)
+不过这里最大的问题就是国内访问的速度真的是很随机啊,想快有时候根本快不了,如果电脑一直打不开,就用手机打开再传到电脑上吧,当然你也可以去hiplot.com.cn上去下载数据,虽然不是最新的,然而至少网速很快,但是需要二次处理一下数据
+首先把数据读进R里面
+library(readr) TP53_Expression_21Q2_Public &lt;- read_csv(&quot;~/Desktop/TP53 Expression 21Q2 Public.csv&quot;) ## Rows: 1378 Columns: 6 ## ─ Column specification ──────────────────────────── ## Delimiter: &quot;,&quot; ## chr (5): Depmap ID, Cell Line Name, Primary Disease, Lineage, Lineage Subtype ## dbl (1): Expression 21Q2 Public ## ## ℹ Use `spec()` to retrieve the full column specification for this data." /><meta property="og:image" content="https://swcyo.netlify.app/media/icon_hua2ec155b4296a9c9791d015323e16eb5_11927_512x512_fill_lanczos_center_3.png" />
+    <meta property="twitter:image" content="https://swcyo.netlify.app/media/icon_hua2ec155b4296a9c9791d015323e16eb5_11927_512x512_fill_lanczos_center_3.png" /><meta property="og:locale" content="en-us" />
+  
+    
+      <meta
+        property="article:published_time"
+        content="2021-08-14T00:00:00&#43;00:00"
+      />
+    
+    <meta property="article:modified_time" content="2021-08-14T18:51:53&#43;08:00">
+  
+
+  
+
+
+    
+
+
+
+
+
+
+  
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://swcyo.netlify.app/post/ccle/"
+  },
+  "headline": "单基因的肿瘤细胞系表达怎么看？CCLE告诉你",
+  
+  "datePublished": "2021-08-14T00:00:00Z",
+  "dateModified": "2021-08-14T18:51:53+08:00",
+  
+  "author": {
+    "@type": "Person",
+    "name": "欧阳松"
+  },
+  
+  "publisher": {
+    "@type": "Organization",
+    "name": "Swcyo",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://swcyo.netlify.app/media/icon_hua2ec155b4296a9c9791d015323e16eb5_11927_192x192_fill_lanczos_center_3.png"
+    }
+  },
+  "description": "泛癌的基因表达量一般可以用TCGA和GTEx实现，而肿瘤细胞系一般用CCLE数据库. 临床生信之家是一个很好的在线工具，目前上架了CCLE的功能，出的图见下，可以实现单基因在泛癌和单病种的可视化，但是这个网址什么都好，就是有次数限制，后面使用要加钱，而且价钱不菲，学生党望而却步。。。\n会R语言，当然可以省掉这笔巨款，而且可以DIY，乐趣无穷 首先去CCLE官网下载数据，目前网页更新了，功能也多了 比如TP53，访问这个网址TP53 DepMap Gene Summary就行，在Characterization里Expression 21Q2 Public右边有个下载标志，基因单位是Log2(TPM+1)，很科学\nCCLE2021年的更新了很多,比以前好看多了,也科学多了啊…\n下载后的数据默认命名是： [TP53 Expression 21Q2 Public.csv`] (https://depmap.org/portal/partials/entity_summary/download?entity_id=38037\u0026amp;dep_enum_name=expression\u0026amp;size_biom_enum_name=none\u0026amp;color=none)\n不过这里最大的问题就是国内访问的速度真的是很随机啊,想快有时候根本快不了,如果电脑一直打不开,就用手机打开再传到电脑上吧,当然你也可以去hiplot.com.cn上去下载数据,虽然不是最新的,然而至少网速很快,但是需要二次处理一下数据\n首先把数据读进R里面\nlibrary(readr) TP53_Expression_21Q2_Public \u0026lt;- read_csv(\u0026quot;~/Desktop/TP53 Expression 21Q2 Public.csv\u0026quot;) ## Rows: 1378 Columns: 6 ## ─ Column specification ──────────────────────────── ## Delimiter: \u0026quot;,\u0026quot; ## chr (5): Depmap ID, Cell Line Name, Primary Disease, Lineage, Lineage Subtype ## dbl (1): Expression 21Q2 Public ## ## ℹ Use `spec()` to retrieve the full column specification for this data."
+}
+</script>
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+  <title>单基因的肿瘤细胞系表达怎么看？CCLE告诉你 | Swcyo</title>
+</head>
+
+
+<body id="top" data-spy="scroll" data-offset="70" data-target="#TableOfContents" class="page-wrapper   " data-wc-page-id="bcc26c812e38334188400b38b80bdb09" >
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <script src="/js/wowchemy-init.min.8988fb2a4bba758785868cfcb5244555.js"></script>
+
+  
+
+
+<aside class="search-modal" id="search">
+  <div class="container">
+    <section class="search-header">
+
+      <div class="row no-gutters justify-content-between mb-3">
+        <div class="col-6">
+          <h1>Search</h1>
+        </div>
+        <div class="col-6 col-search-close">
+          <a class="js-search" href="#" aria-label="Close"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <div id="search-box">
+        
+        <input name="q" id="search-query" placeholder="Search..." autocapitalize="off"
+        autocomplete="off" autocorrect="off" spellcheck="false" type="search" class="form-control"
+        aria-label="Search...">
+        
+      </div>
+
+      
+      
+
+      
+
+    </section>
+    <section class="section-search-results">
+
+      <div id="search-hits">
+        
+      </div>
+
+    </section>
+  </div>
+</aside>
+
+
+
+  <div class="page-header">
+    
+
+
+
+
+
+
+
+
+
+
+
+
+<nav class="navbar navbar-expand-lg navbar-light compensate-for-scrollbar" id="navbar-main">
+  <div class="container-xl">
+
+    
+    <div class="d-none d-lg-inline-flex">
+      <a class="navbar-brand" href="/">Swcyo</a>
+    </div>
+    
+
+    
+    <button type="button" class="navbar-toggler" data-toggle="collapse"
+            data-target="#navbar-content" aria-controls="navbar-content" aria-expanded="false" aria-label="Toggle navigation">
+    <span><i class="fas fa-bars"></i></span>
+    </button>
+    
+
+    
+    <div class="navbar-brand-mobile-wrapper d-inline-flex d-lg-none">
+      <a class="navbar-brand" href="/">Swcyo</a>
+    </div>
+    
+
+    
+    
+    <div class="navbar-collapse main-menu-item collapse justify-content-start" id="navbar-content">
+
+      
+      <ul class="navbar-nav d-md-inline-flex">
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+
+        
+        
+        
+        
+
+        
+          
+            
+            
+          
+          
+            
+            
+            
+              
+            
+            
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#about"><span>Home</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+
+        
+
+        
+        
+        
+        
+
+        
+          
+            
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link  active" href="/post"><span>Blogs</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+
+        
+        
+        
+        
+
+        
+          
+            
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/project"><span>Projects</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+
+        
+        
+        
+        
+
+        
+          
+            
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/event"><span>Events</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+
+        
+        
+        
+        
+
+        
+          
+            
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/publication"><span>Publications</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+
+        
+        
+        
+        
+
+        
+          
+            
+            
+          
+          
+            
+            
+            
+              
+            
+            
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#people"><span>Teams</span></a>
+        </li>
+
+        
+        
+
+      
+
+        
+      </ul>
+    </div>
+
+    <ul class="nav-icons navbar-nav flex-row ml-auto d-flex pl-md-2">
+
+      
+      
+        
+      
+
+      
+      
+      <li class="nav-item">
+        <a class="nav-link js-search" href="#" aria-label="Search"><i class="fas fa-search" aria-hidden="true"></i></a>
+      </li>
+      
+
+      
+      
+      <li class="nav-item dropdown theme-dropdown">
+        <a href="#" class="nav-link" data-toggle="dropdown" aria-haspopup="true" aria-label="Display preferences">
+          <i class="fas fa-moon" aria-hidden="true"></i>
+        </a>
+        <div class="dropdown-menu">
+          <a href="#" class="dropdown-item js-set-theme-light">
+            <span>Light</span>
+          </a>
+          <a href="#" class="dropdown-item js-set-theme-dark">
+            <span>Dark</span>
+          </a>
+          <a href="#" class="dropdown-item js-set-theme-auto">
+            <span>Automatic</span>
+          </a>
+        </div>
+      </li>
+      
+
+      
+      
+
+    </ul>
+
+  </div>
+</nav>
+
+
+  </div>
+
+  <div class="page-body">
+    <article class="article">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+  
+  
+<div class="article-container pt-3">
+  <h1>单基因的肿瘤细胞系表达怎么看？CCLE告诉你</h1>
+
+  
+
+  
+    
+
+
+<div class="article-metadata">
+
+  
+  
+
+  
+  <span class="article-date">
+    
+    
+      
+          Last updated on
+      
+    
+    Aug 14, 2021
+  </span>
+  
+
+  
+
+  
+  <span class="middot-divider"></span>
+  <span class="article-reading-time">
+    2 min read
+  </span>
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+  
+
+</div>
+
+    
+
+
+
+
+
+  
+</div>
+
+
+
+  <div class="article-container">
+
+    <div class="article-style">
+      
+
+
+<p>泛癌的基因表达量一般可以用TCGA和GTEx实现，而肿瘤细胞系一般用CCLE数据库.
+<a href="https://www.aclbi.com/static/index.html#/ccle">临床生信之家</a>是一个很好的在线工具，目前上架了CCLE的功能，出的图见下，可以实现单基因在泛癌和单病种的可视化，但是这个网址什么都好，就是有次数限制，后面使用要<code>加钱</code>，而且价钱不菲，学生党望而却步。。。</p>
+<div id="会r语言当然可以省掉这笔巨款而且可以diy乐趣无穷" class="section level5">
+<h5>会R语言，当然可以省掉这笔巨款，而且可以DIY，乐趣无穷</h5>
+<p>首先去CCLE官网下载数据，目前网页更新了，功能也多了
+比如<code>TP53</code>，访问这个网址<a href="https://depmap.org/portal/gene/TP53?tab=overview&amp;characterization=expressio#characterization">TP53 DepMap Gene Summary</a>就行，在<code>Characterization</code>里<code>Expression 21Q2 Public</code>右边有个下载标志，基因单位是<code>Log2(TPM+1)</code>，很科学</p>
+<p>CCLE2021年的更新了很多,比以前好看多了,也科学多了啊…</p>
+<p>下载后的数据默认命名是： [TP53 Expression 21Q2 Public.csv`]
+(<a href="https://depmap.org/portal/partials/entity_summary/download?entity_id=38037&amp;dep_enum_name=expression&amp;size_biom_enum_name=none&amp;color=none" class="uri">https://depmap.org/portal/partials/entity_summary/download?entity_id=38037&amp;dep_enum_name=expression&amp;size_biom_enum_name=none&amp;color=none</a>)</p>
+<p>不过这里最大的问题就是国内访问的速度真的是很随机啊,想快有时候根本快不了,如果电脑一直打不开,就用手机打开再传到电脑上吧,当然你也可以去hiplot.com.cn上去下载数据,虽然不是最新的,然而至少网速很快,但是需要二次处理一下数据</p>
+<p>首先把数据读进R里面</p>
+<pre class="r"><code>library(readr)
+TP53_Expression_21Q2_Public &lt;- read_csv(&quot;~/Desktop/TP53 Expression 21Q2 Public.csv&quot;)</code></pre>
+<pre><code>## Rows: 1378 Columns: 6</code></pre>
+<pre><code>## ─ Column specification ────────────────────────────
+## Delimiter: &quot;,&quot;
+## chr (5): Depmap ID, Cell Line Name, Primary Disease, Lineage, Lineage Subtype
+## dbl (1): Expression 21Q2 Public</code></pre>
+<pre><code>## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<p>可以看到表格里很多有用信息，包括基因表达量、细胞系名、原发病、器官和亚型，这样我们不用二次处理了,可以跑代码了</p>
+<ul>
+<li>第一步，画个泛癌的boxplot，可以用ggplot2，也可以用ggpubr的ggboxplot函数，但是最好还是ggplot2，可以按中位数排序，标上均数标准差，还可以标一下所有数值的均值</li>
+</ul>
+<pre class="r"><code>library(ggplot2)
+library(ggpubr)
+ggplot(TP53_Expression_21Q2_Public, 
+       aes(x = reorder(`Primary Disease`,`Expression 21Q2 Public`, FUN = median),  #按中位数自动排序
+           y =`Expression 21Q2 Public`,color=`Primary Disease`)) + #y也可以是Lineage
+    geom_boxplot()+ #添加boxplot
+    geom_point() + #添加点
+    theme_classic(base_size = 12)+ #主题和字体大小
+    rotate_x_text(45)+ #X轴45度倾斜一下
+    theme(legend.position=&quot;none&quot;)+ #不需要显示标签
+    xlab(NULL)+ylab(&quot;TP53 expression \nLog2(TPM+1)&quot;)+ #改下坐标名称
+    stat_summary(fun.data = &#39;mean_sd&#39;, geom = &quot;errorbar&quot;, width = 0.5,position = position_dodge(0.9))+ #自动计算均数标准差，加个误差棒
+    geom_hline(yintercept = mean(TP53_Expression_21Q2_Public$`Expression 21Q2 Public`), lty = 2)</code></pre>
+<p><img src="https://swcyo.netlify.app/post/ccle/index_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<pre class="r"><code>#自动计算均值，标个虚线</code></pre>
+<p>当然也可以统计一下差异，再加一句<code>+stat_compare_means(method = "anova")</code>就行。</p>
+<ul>
+<li><p>第二步，提取单个癌症的数据画个棒棒糖图，可以用<code>ggplot2</code>，也可以<code>用ggpubr</code>的<code>ggdotchart</code>画图，不过最好还是<code>ggplot2</code></p></li>
+<li><p>比如，你只想提取肾癌的数据,可以用这个公式,由于是文字,需要加引号,如果是数字,就不需要引号</p></li>
+</ul>
+<pre class="r"><code>data&lt;-TP53_Expression_21Q2_Public[TP53_Expression_21Q2_Public$`Primary Disease` == &#39;Kidney Cancer&#39;,]</code></pre>
+<p>我是这样设计图片的，以点的大小代表基因表达量，按颜色表达程度，颜色从蓝到红，可以从大到小排序，也可以从小到大排列，然后用均数隔开</p>
+<pre class="r"><code>ggplot(data, aes(x=reorder(`Cell Line Name`,`Expression 21Q2 Public`), y=`Expression 21Q2 Public`)) + 
+    geom_point(aes(size=`Expression 21Q2 Public`,color=`Expression 21Q2 Public`),stat=&#39;identity&#39;) +scale_color_continuous(low=&#39;blue&#39; ,high=&#39;red&#39;) +
+    geom_segment(aes(y = mean(`Expression 21Q2 Public`), 
+                     x = `Cell Line Name`, 
+                     yend = `Expression 21Q2 Public`, 
+                     xend = `Cell Line Name`), 
+                 color = &quot;black&quot;) +
+    theme_classic(base_size = 12) + 
+    coord_flip() + 
+    xlab(NULL)+ylab(&quot;TP53 expression&quot;)+
+    geom_hline(yintercept = mean(data$`Expression 21Q2 Public`), lty = 2)</code></pre>
+<p><img src="https://swcyo.netlify.app/post/ccle/index_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>从小到大再来一次，reorder里加个-就行</p>
+<pre class="r"><code>ggplot(data, aes(x=reorder(`Cell Line Name`,-`Expression 21Q2 Public`), y=`Expression 21Q2 Public`)) + 
+    geom_point(aes(size=`Expression 21Q2 Public`,color=`Expression 21Q2 Public`),stat=&#39;identity&#39;) +scale_color_continuous(low=&#39;blue&#39; ,high=&#39;red&#39;) +
+    geom_segment(aes(y = mean(`Expression 21Q2 Public`), 
+                     x = `Cell Line Name`, 
+                     yend = `Expression 21Q2 Public`, 
+                     xend = `Cell Line Name`), 
+                 color = &quot;black&quot;) +
+    theme_classic(base_size = 12) + 
+    coord_flip() + 
+    xlab(NULL)+ylab(&quot;TP53 expression&quot;)+
+    geom_hline(yintercept = mean(data$`Expression 21Q2 Public`), lty = 2)</code></pre>
+<p><img src="https://swcyo.netlify.app/post/ccle/index_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+</div>
+<div id="不要钱的不香吗" class="section level2">
+<h2>不要钱的，不香吗？</h2>
+</div>
+
+    </div>
+
+    
+
+
+
+
+
+
+<div class="article-tags">
+  
+  <a class="badge badge-light" href="/tag/r/">R</a>
+  
+</div>
+
+
+
+<div class="share-box" aria-hidden="true">
+  <ul class="share">
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://twitter.com/intent/tweet?url=https://swcyo.netlify.app/post/ccle/&amp;text=%e5%8d%95%e5%9f%ba%e5%9b%a0%e7%9a%84%e8%82%bf%e7%98%a4%e7%bb%86%e8%83%9e%e7%b3%bb%e8%a1%a8%e8%be%be%e6%80%8e%e4%b9%88%e7%9c%8b%ef%bc%9fCCLE%e5%91%8a%e8%af%89%e4%bd%a0" target="_blank" rel="noopener" class="share-btn-twitter">
+          <i class="fab fa-twitter"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.facebook.com/sharer.php?u=https://swcyo.netlify.app/post/ccle/&amp;t=%e5%8d%95%e5%9f%ba%e5%9b%a0%e7%9a%84%e8%82%bf%e7%98%a4%e7%bb%86%e8%83%9e%e7%b3%bb%e8%a1%a8%e8%be%be%e6%80%8e%e4%b9%88%e7%9c%8b%ef%bc%9fCCLE%e5%91%8a%e8%af%89%e4%bd%a0" target="_blank" rel="noopener" class="share-btn-facebook">
+          <i class="fab fa-facebook"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="mailto:?subject=%e5%8d%95%e5%9f%ba%e5%9b%a0%e7%9a%84%e8%82%bf%e7%98%a4%e7%bb%86%e8%83%9e%e7%b3%bb%e8%a1%a8%e8%be%be%e6%80%8e%e4%b9%88%e7%9c%8b%ef%bc%9fCCLE%e5%91%8a%e8%af%89%e4%bd%a0&amp;body=https://swcyo.netlify.app/post/ccle/" target="_blank" rel="noopener" class="share-btn-email">
+          <i class="fas fa-envelope"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.linkedin.com/shareArticle?url=https://swcyo.netlify.app/post/ccle/&amp;title=%e5%8d%95%e5%9f%ba%e5%9b%a0%e7%9a%84%e8%82%bf%e7%98%a4%e7%bb%86%e8%83%9e%e7%b3%bb%e8%a1%a8%e8%be%be%e6%80%8e%e4%b9%88%e7%9c%8b%ef%bc%9fCCLE%e5%91%8a%e8%af%89%e4%bd%a0" target="_blank" rel="noopener" class="share-btn-linkedin">
+          <i class="fab fa-linkedin-in"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="whatsapp://send?text=%e5%8d%95%e5%9f%ba%e5%9b%a0%e7%9a%84%e8%82%bf%e7%98%a4%e7%bb%86%e8%83%9e%e7%b3%bb%e8%a1%a8%e8%be%be%e6%80%8e%e4%b9%88%e7%9c%8b%ef%bc%9fCCLE%e5%91%8a%e8%af%89%e4%bd%a0%20https://swcyo.netlify.app/post/ccle/" target="_blank" rel="noopener" class="share-btn-whatsapp">
+          <i class="fab fa-whatsapp"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://service.weibo.com/share/share.php?url=https://swcyo.netlify.app/post/ccle/&amp;title=%e5%8d%95%e5%9f%ba%e5%9b%a0%e7%9a%84%e8%82%bf%e7%98%a4%e7%bb%86%e8%83%9e%e7%b3%bb%e8%a1%a8%e8%be%be%e6%80%8e%e4%b9%88%e7%9c%8b%ef%bc%9fCCLE%e5%91%8a%e8%af%89%e4%bd%a0" target="_blank" rel="noopener" class="share-btn-weibo">
+          <i class="fab fa-weibo"></i>
+        </a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+
+
+  
+  
+  
+    
+  
+  
+  
+  <div class="media author-card content-widget-hr">
+    
+      
+      <a href="https://swcyo.netlify.app/"><img class="avatar mr-3 avatar-circle" src="/author/%E6%AC%A7%E9%98%B3%E6%9D%BE/avatar_hu32f889f3337c9db9518846833613667f_51454_270x270_fill_q75_lanczos_center.jpg" alt="欧阳松"></a>
+    
+
+    <div class="media-body">
+      <h5 class="card-title"><a href="https://swcyo.netlify.app/">欧阳松</a></h5>
+      <h6 class="card-subtitle">主治医师、讲师</h6>
+      <p class="card-text">My research interests include urogenital tumors, urolithiasis, male infertility, male erectile dysfunction,etc.</p>
+      <ul class="network-icon" aria-hidden="true">
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+    <li>
+      <a href="mailto:ouyangsong87@gamil.com" >
+        <i class="fas fa-envelope"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://scholar.google.co.uk/citations?user=eTN286IAAAAJ" target="_blank" rel="noopener">
+        <i class="fas fa-graduation-cap"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://orcid.org/0000-0001-7962-2811" target="_blank" rel="noopener">
+        <i class="fab fa-orcid"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://github.com/swcyo" target="_blank" rel="noopener">
+        <i class="fab fa-github"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="/swcyoyond" >
+        <i class="fab fa-weixin"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://swcyo.gitee.io/cv" target="_blank" rel="noopener">
+        <i class="ai ai-cv"></i>
+      </a>
+    </li>
+  
+</ul>
+
+    </div>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <div class="article-widget content-widget-hr">
+    <h3>Related</h3>
+    <ul>
+      
+      <li><a href="/post/oncomine/">ROnmine处理oncomine数据</a></li>
+      
+      <li><a href="/post/torwilcoxon/">如何准确的使用R进行两独立样本的显著性检验，T检验？非参数检验？</a></li>
+      
+      <li><a href="/post/rstuido/">RStudio1.4发布，新增markdown可视化太强大了</a></li>
+      
+      <li><a href="/post/r-cck8-mtt/">R语言处理CCK8或MTT数据，一步绘制生长曲线</a></li>
+      
+      <li><a href="/post/tcga-cox2/">单基因TCGA的Cox森林图怎么画才好看呢</a></li>
+      
+    </ul>
+  </div>
+  
+
+
+
+
+
+  </div>
+</article>
+  </div>
+
+  <div class="page-footer">
+    
+    
+    <div class="container">
+      <footer class="site-footer">
+
+  
+
+
+
+  
+
+  
+
+  
+  <p class="powered-by">
+    © {2021} Song Ou-Yang
+  </p>
+  
+
+  
+  
+
+
+
+
+
+
+  <p class="powered-by">
+    
+    
+    
+      
+      
+      
+      
+      
+      
+      Published with <a href="https://wowchemy.com/?utm_campaign=poweredby" target="_blank" rel="noopener">Wowchemy</a> — the free, <a href="https://github.com/wowchemy/wowchemy-hugo-modules" target="_blank" rel="noopener">open source</a> website builder that empowers creators.
+    
+  </p>
+</footer>
+
+    </div>
+    
+  </div>
+
+  
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code class="tex hljs"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-outline-primary my-1 js-copy-cite" href="#" target="_blank">
+          <i class="fas fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-outline-primary my-1 js-download-cite" href="#" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+      
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/instant.page/5.1.0/instantpage.min.js" integrity="sha512-1+qUtKoh9XZW7j+6LhRMAyOrgSQKenQ4mluTR+cvxXjP1Z54RxZuzstR/H9kgPXQsVB8IW7DMDFUJpzLjvhGSQ==" crossorigin="anonymous"></script>
+
+      
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js" integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js" integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin="anonymous"></script>
+      
+
+      
+      
+
+      
+
+      
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.2.0/highlight.min.js" integrity="sha512-TDKKr+IvoqZnPzc3l35hdjpHD0m+b2EC2SrLEgKDRWpxf2rFCxemkgvJ5kfU48ip+Y+m2XVKyOCD85ybtlZDmw==" crossorigin="anonymous"></script>
+        
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.2.0/languages/r.min.js" crossorigin="anonymous"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.2.0/languages/python.min.js" crossorigin="anonymous"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.2.0/languages/latex.min.js" crossorigin="anonymous"></script>
+        
+      
+
+    
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.min.js" integrity="sha512-SeiQaaDh73yrb56sTW/RgVdi/mMqNeM2oBwubFHagc5BkixSpP1fvqF47mKzPGWYSSy4RwbBunrJBQ4Co8fRWA==" crossorigin="anonymous"></script>
+    
+
+    
+    
+
+    
+    
+    
+      
+      <script id="search-hit-fuse-template" type="text/x-template">
+        <div class="search-hit" id="summary-{{key}}">
+          <div class="search-hit-content">
+            <div class="search-hit-name">
+              <a href="{{relpermalink}}">{{title}}</a>
+              <div class="article-metadata search-hit-type">{{type}}</div>
+              <p class="search-hit-description">{{snippet}}</p>
+            </div>
+          </div>
+        </div>
+      </script>
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js" integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
+      
+    
+
+    
+    
+
+    
+    
+    
+    
+
+    
+    <script src="/js/bootstrap.bundle.min.6aed84840afc03ab4d5750157f69c120.js"></script>
+
+    
+    
+      
+      
+      
+      
+      
+      
+      
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+      
+      
+    
+    
+    <script src="/en/js/wowchemy.min.d68ecd57c0ec1f1f61d65fd568f1c3a0.js"></script>
+
+    
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+
+
+
+</body>
+</html>
