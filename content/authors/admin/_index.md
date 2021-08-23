@@ -27,7 +27,7 @@ interests:
 education:
   courses:
   - course: 医学博士(泌尿外科)
-    institution: 华中科技大学同济医学院附属同济语言
+    institution: 华中科技大学同济医学院附属同济医院
     year: 2021
   - course: 医学硕士(外科学)
     institution: 石河子大学医学院
@@ -47,7 +47,7 @@ social:
   link: mailto:ouyangsong87@gamil.com
 - icon: graduation-cap
   icon_pack: fas
-  link: https://scholar.google.co.uk/citations?user=eTN286IAAAAJ
+  link: https://xueshu.baidu.com/scholarID/CN-BP74VAPJ
 - icon: orcid
   icon_pack: fab
   link: https://orcid.org/0000-0001-7962-2811
