@@ -16,6 +16,12 @@ image:
   preview_only: no
 projects: []
 ---
+<i class="far fa-eye">
+<span id="busuanzi_container_site_pv">
+    访问量：<span id="busuanzi_value_site_pv"></span>
+</span>
+</i>
+
 项目名称：高糖环境下逼尿肌中SCF/c-kit信号变化及其对膀胱Cajal样间质细胞的影响
 【学科分类】：医学科学部(H) -> 泌尿系统(H05) -> 继发性肾脏疾病(H0510)
 【执行时间】：2009-01至2011-12
